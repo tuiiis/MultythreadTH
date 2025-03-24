@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 
-string dllRelativePath = Path.Combine("..", "..", "..", "..", "Reflection.dll");
-string dllFullPath = Path.GetFullPath(dllRelativePath);
+Console.Write("Enter the full path to the DLL: ");
+string dllFullPath = Path.GetFullPath(Console.ReadLine());
 
 if (!File.Exists(dllFullPath))
 {
