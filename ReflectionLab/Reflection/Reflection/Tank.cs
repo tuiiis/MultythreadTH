@@ -5,18 +5,11 @@
         private int ID { get; set; }
         public string Model { get; set; }
         public string SerialNumber { get; set; }
-        public TankType? TankType { get; set; } // light, medium, heavy
+        public TankType? TankType { get; set; }
 
-        public static Tank Create(int id, string model, string serialNumber, string tankType)
+        public static Tank Create(int id, string model, string serialNumber, TankType tankType)
         {
-            if (Enum.TryParse(tankType, true, out TankType parsedType))
-            {
-                return new Tank { ID = id, Model = model, SerialNumber = serialNumber, TankType = parsedType };
-            }
-            else
-            {
-                throw new ArgumentException("Invalid tank type. Choose: Light, Medium, Heavy.");
-            }
+            return new Tank { ID = id, Model = model, SerialNumber = serialNumber, TankType = tankType };
         }
 
         public void PrintObject()
@@ -26,12 +19,5 @@
             Console.WriteLine($"Serial Number: {SerialNumber}");
             Console.WriteLine($"Tank Type: {TankType}");
         }
-    }
-
-    public enum TankType
-    {
-        Light,
-        Medium,
-        Heavy
     }
 }

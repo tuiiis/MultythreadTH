@@ -1,34 +1,19 @@
-﻿namespace reflection;
+﻿namespace Task_1;
 
 public class Tank
 {
-    private int ID { get; set; }
+    public int ID { get; set; }
     public string Model { get; set; }
     public string SerialNumber { get; set; }
-    public TankType? TankType { get; set; } // light, medium, heavy???
+    public TankType? TankType { get; set; }
 
-    public Tank(int iD, string model, string serialNumber, string tankType)
+    public Tank(int id, string model, string serialNumber, TankType tankType)
     {
-        ID = iD;
+        ID = id;
         Model = model;
         SerialNumber = serialNumber;
-
-        if (Enum.TryParse(tankType, true, out TankType parsedType))
-        {
-            TankType = parsedType;
-        }
-        else
-        {
-            throw new ArgumentException("Invalid tank type. Choose: Light, Medium, Heavy.");
-        }
+        TankType = tankType;
     }
-}
-
-public enum TankType
-{
-    Light,
-    Medium,
-    Heavy
 }
 
 
