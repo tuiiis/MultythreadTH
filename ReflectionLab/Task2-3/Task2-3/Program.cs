@@ -1,154 +1,203 @@
 ﻿using System.Reflection;
 
-Console.Write("Enter the full path to the DLL: ");
-string dllFullPath = Path.GetFullPath(Console.ReadLine());
+const string PrintObjectMethodName = "PrintObject";
 
+Console.Write("Enter the full path to the DLL: ");
+string? inputPath = Console.ReadLine();
+if (string.IsNullOrWhiteSpace(inputPath))
+{
+    Console.WriteLine("Invalid path.");
+    return;
+}
+
+string dllFullPath = Path.GetFullPath(inputPath);
 if (!File.Exists(dllFullPath))
 {
     Console.WriteLine($"DLL not found at: {dllFullPath}");
     return;
 }
 
-Assembly assembly = Assembly.LoadFrom(dllFullPath);
+Assembly assembly = Assembly.Load(dllFullPath);
 Console.WriteLine($"Loaded assembly: {assembly.FullName}");
 
-
-Type[] types = assembly.GetTypes();
-
-
-foreach (var type in types)
+foreach (Type type in assembly.GetTypes())
 {
     Console.WriteLine($"Class: {type.FullName}");
-
-
-    var properties = type.GetProperties();
-    if (properties.Length > 0)
-    {
-        Console.WriteLine("  Properties:");
-        foreach (var prop in properties)
-        {
-            Console.WriteLine($"   - {prop.Name} ({prop.PropertyType.Name})");
-        }
-    }
-
-
-    var methodlist = type.GetMethods();
-    if (methodlist.Length > 0)
-    {
-        Console.WriteLine("  Methods:");
-        foreach (var method in methodlist)
-        {
-            Console.WriteLine($"    - {method.Name} ({string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name))})");
-        }
-    }
-
-    var fields = type.GetFields();
-    if (fields.Length > 0)
-    {
-        Console.WriteLine("  Fields:");
-        foreach (var field in fields)
-        {
-            Console.WriteLine($"    - {field.Name} ({field.FieldType.Name})");
-        }
-    }
+    PrintMembers(type);
 }
 
-Console.WriteLine("Enter the name of the class you want to work with:");
+Console.Write("Enter the class name to work with: ");
 string? className = Console.ReadLine();
-Type? selectedType = types.FirstOrDefault(t => t.FullName == className);
+if (string.IsNullOrWhiteSpace(className))
+{
+    Console.WriteLine("Class name cannot be empty.");
+    return;
+}
 
+Type? selectedType = assembly.GetType(className);
 if (selectedType == null)
 {
     Console.WriteLine("Class not found.");
     return;
 }
 
-MethodInfo? createMethod = selectedType.GetMethod("Create", BindingFlags.Static | BindingFlags.Public);
-object? result = null;
-if (createMethod != null)
+object? instance = InvokeCreateMethod(selectedType);
+if (instance != null)
 {
-    ParameterInfo[] methodParams = createMethod.GetParameters();
-    object[] methodArgs = new object[methodParams.Length];
+    InvokePrintObjectMethod(instance, selectedType);
+}
+else
+{
+    Console.WriteLine("Object creation failed.");
+}
 
-    for (int i = 0; i < methodParams.Length; i++)
+static void PrintMembers(Type type)
+{
+    PropertyInfo[] properties = type.GetProperties();
+    if (properties.Length > 0)
     {
-        Console.WriteLine($"Enter an argument for {createMethod.Name} method: ({methodParams[i].ParameterType.Name} {methodParams[i].Name}): ");
-        string? input = Console.ReadLine();
-
-        try
+        Console.WriteLine("  Properties:");
+        foreach (PropertyInfo prop in properties)
         {
-            if (methodParams[i].ParameterType.IsArray)
-            {
-                Console.WriteLine("Use commas for array elements:");
-                Type? elementType = methodParams[i].ParameterType.GetElementType();
-                string[] elements = input.Split(',');
-                Array array = Array.CreateInstance(elementType, elements.Length);
-
-                for (int j = 0; j < elements.Length; j++)
-                {
-                    array.SetValue(Convert.ChangeType(elements[j].Trim(), elementType), j);
-                }
-
-                methodArgs[i] = array;
-            }
-            else
-            {
-                methodArgs[i] = Convert.ChangeType(input, methodParams[i].ParameterType);
-            }
+            Console.WriteLine($"    - {prop.Name} ({prop.PropertyType.Name})");
         }
-        catch (Exception e)
+    }
+
+    MethodInfo[] methods = type.GetMethods();
+    if (methods.Length > 0)
+    {
+        Console.WriteLine("  Methods:");
+        foreach (MethodInfo method in methods)
         {
-            Console.WriteLine("Wrong input type");
-            Console.WriteLine(e.Message);
-            i--;
-            continue;
+            Console.WriteLine($"    - {method.Name} ({string.Join(", ", method.GetParameters().Select(p => p.ParameterType.Name))})");
         }
+    }
+
+    FieldInfo[] fields = type.GetFields();
+    if (fields.Length > 0)
+    {
+        Console.WriteLine("  Fields:");
+        foreach (FieldInfo field in fields)
+        {
+            Console.WriteLine($"    - {field.Name} ({field.FieldType.Name})");
+        }
+    }
+}
+
+static object? InvokeCreateMethod(Type type)
+{
+    MethodInfo? createMethod = type.GetMethod("Create", BindingFlags.Static | BindingFlags.Public);
+    if (createMethod == null)
+    {
+        Console.WriteLine("Static method 'Create' not found.");
+        return null;
+    }
+
+    object[] args = GetMethodArguments(createMethod);
+    try
+    {
+        return createMethod.Invoke(null, args);
+    }
+    catch (Exception e)
+    {
+        Console.WriteLine($"Error calling Create: {e.InnerException?.Message ?? e.Message}");
+        return null;
+    }
+}
+
+static void InvokePrintObjectMethod(object instance, Type type)
+{
+    MethodInfo? printMethod = type.GetMethod(PrintObjectMethodName, BindingFlags.Instance | BindingFlags.Public);
+    if (printMethod == null)
+    {
+        Console.WriteLine($"Method '{PrintObjectMethodName}' not found.");
+        return;
     }
 
     try
     {
-        result = createMethod.Invoke(null, methodArgs);
-        Console.WriteLine($"Method {createMethod.Name} returned: {result}");
-    }
-    catch (TargetInvocationException e) when (e.InnerException != null)
-    {
-        Console.WriteLine($"Constructor error: {e.InnerException.Message}");
+        printMethod.Invoke(instance, null);
     }
     catch (Exception e)
     {
-        Console.WriteLine($"Error calling method: {e.Message}");
+        Console.WriteLine($"Error calling {PrintObjectMethodName}: {e.InnerException?.Message ?? e.Message}");
+    }
+}
+
+static object[] GetMethodArguments(MethodInfo method)
+{
+    ParameterInfo[] parameters = method.GetParameters();
+    object[] arguments = new object[parameters.Length];
+
+    for (int i = 0; i < parameters.Length; i++)
+    {
+        arguments[i] = GetParameterValue(parameters[i]);
     }
 
-}
-else
-{
-    Console.WriteLine("Static method 'Create' not found.");
+    return arguments;
 }
 
-if (result != null)
+static object GetParameterValue(ParameterInfo parameter)
 {
-    MethodInfo? printMethod = selectedType.GetMethod("PrintObject", BindingFlags.Instance | BindingFlags.Public);
-
-    if (printMethod != null)
+    while (true)
     {
+        Console.Write($"Enter value for {parameter.Name} ({parameter.ParameterType.Name}): ");
+        string? input = Console.ReadLine();
+
+        if (input == null)
+        {
+            Console.WriteLine("Input cannot be null, try again.");
+            continue;
+        }
+
+        Type paramType = parameter.ParameterType;
+
         try
         {
-            printMethod.Invoke(result, null);
+            if (paramType.IsArray)
+            {
+                Console.WriteLine("Use commas for array elements:");
+                input = Console.ReadLine();
+                if (input == null)
+                {
+                    Console.WriteLine("Input cannot be null, try again.");
+                    continue;
+                }
+
+                Type? elementType = paramType.GetElementType();
+                if (elementType == null)
+                {
+                    Console.WriteLine("Element type is null.");
+                    continue;
+                }
+
+                string[] elements = input.Split(',');
+
+                Array array = Array.CreateInstance(elementType, elements.Length);
+                for (int j = 0; j < elements.Length; j++)
+                {
+                    array.SetValue(Convert.ChangeType(elements[j].Trim(), elementType), j);
+                }
+                return array;
+            }
+            else if (paramType.IsEnum)
+            {
+                Console.WriteLine($"Available values: {string.Join(", ", Enum.GetNames(paramType))}");
+                if (Enum.TryParse(paramType, input, true, out object? enumValue) && Enum.IsDefined(paramType, enumValue))
+                {
+                    return enumValue;
+                }
+                Console.WriteLine("Invalid enum value, try again.");
+            }
+            else
+            {
+                return Convert.ChangeType(input, paramType);
+            }
         }
         catch (Exception e)
         {
-            Console.WriteLine($"Error calling PrintObject: {e.Message}");
+            Console.WriteLine("Wrong input type, try again.");
+            Console.WriteLine(e.Message);
         }
     }
-    else
-    {
-        Console.WriteLine("Method 'PrintObject' not found");
-    }
 }
-else
-{
-    Console.WriteLine("Object creation failed, cannot call PrintObject().");
-}
-
-
-Console.ReadLine();
