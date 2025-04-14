@@ -1,6 +1,8 @@
 ﻿using Bogus;
+using Serialization.Models;
 
-namespace Serialization.Classes
+
+namespace Serialization.Helpers
 {
     public static class ClassFaker
     {
