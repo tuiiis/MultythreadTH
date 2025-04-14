@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root>
+  <Manufacturers>
+    <Manufacturer>
+      <Name>Name</Name>
+      <Address>4641 Kariane Turnpike, Lake Troy, Lao People's Democratic Republic</Address>
+      <IsAChildCompany>true</IsAChildCompany>
+    </Manufacturer>
+    <Manufacturer>
+      <Name>Williamson, Kub and Mueller</Name>
+      <Address>7672 Reinger Crossing, West Richie, Mauritania</Address>
+      <IsAChildCompany>false</IsAChildCompany>
+    </Manufacturer>
+    <Manufacturer>
+      <Name>Howell, Will and Hamill</Name>
+      <Address>94046 Aufderhar Lakes, Cassandreview, Nigeria</Address>
+      <IsAChildCompany>false</IsAChildCompany>
+    </Manufacturer>
+    <Manufacturer>
+      <Name>Halvorson - Welch</Name>
+      <Address>35617 Greenholt Roads, Alyciabury, Bhutan</Address>
+      <IsAChildCompany>true</IsAChildCompany>
+    </Manufacturer>
+    <Manufacturer>
+      <Name>Stehr - Williamson</Name>
+      <Address>492 Rath Prairie, O'Connellville, Honduras</Address>
+      <IsAChildCompany>false</IsAChildCompany>
+    </Manufacturer>
+    <Manufacturer>
+      <Name>Davis - Heidenreich</Name>
+      <Address>91793 Grayce Isle, Merlshire, Cote d'Ivoire</Address>
+      <IsAChildCompany>false</IsAChildCompany>
+    </Manufacturer>
+    <Manufacturer>
+      <Name>D'Amore, Blick and Walter</Name>
+      <Address>849 Margaret Field, Port Weston, Switzerland</Address>
+      <IsAChildCompany>false</IsAChildCompany>
+    </Manufacturer>
+    <Manufacturer>
+      <Name>Koss, Stokes and Zemlak</Name>
+      <Address>1110 Davis Row, Elisabethmouth, Greenland</Address>
+      <IsAChildCompany>true</IsAChildCompany>
+    </Manufacturer>
+    <Manufacturer>
+      <Name>Cummings, Grady and Lehner</Name>
+      <Address>9008 Greenholt Freeway, North Trey, Finland</Address>
+      <IsAChildCompany>true</IsAChildCompany>
+    </Manufacturer>
+    <Manufacturer>
+      <Name>Pacocha, Schuppe and Adams</Name>
+      <Address>1769 Rodriguez Isle, Genesiston, Cape Verde</Address>
+      <IsAChildCompany>true</IsAChildCompany>
+    </Manufacturer>
+  </Manufacturers>
+  <Tanks>
+    <Tank>
+      <ID>0</ID>
+      <Model>Handcrafted Metal Car</Model>
+      <SerialNumber>1UL3ZCMXGX</SerialNumber>
+      <TankType>AmphibiousTank</TankType>
+    </Tank>
+    <Tank>
+      <ID>1</ID>
+      <Model>Intelligent Rubber Towels</Model>
+      <SerialNumber>8TNOQOJNRJ</SerialNumber>
+      <TankType>StandardTank</TankType>
+    </Tank>
+    <Tank>
+      <ID>2</ID>
+      <Model>Handmade Granite Soap</Model>
+      <SerialNumber>DOP5ERLUDL</SerialNumber>
+      <TankType>StandardTank</TankType>
+    </Tank>
+    <Tank>
+      <ID>3</ID>
+      <Model>Fantastic Soft Towels</Model>
+      <SerialNumber>6PUMXMYVBM</SerialNumber>
+      <TankType>HeavyTank</TankType>
+    </Tank>
+    <Tank>
+      <ID>4</ID>
+      <Model>Rustic Frozen Hat</Model>
+      <SerialNumber>CK14O2ZEHE</SerialNumber>
+      <TankType>HeavyTank</TankType>
+    </Tank>
+    <Tank>
+      <ID>5</ID>
+      <Model>Unbranded Metal Car</Model>
+      <SerialNumber>U63DSX2GXA</SerialNumber>
+      <TankType>StandardTank</TankType>
+    </Tank>
+    <Tank>
+      <ID>6</ID>
+      <Model>Practical Frozen Tuna</Model>
+      <SerialNumber>7SLLAZS646</SerialNumber>
+      <TankType>AmphibiousTank</TankType>
+    </Tank>
+    <Tank>
+      <ID>7</ID>
+      <Model>Unbranded Cotton Car</Model>
+      <SerialNumber>4S8LLBGVA5</SerialNumber>
+      <TankType>StandardTank</TankType>
+    </Tank>
+    <Tank>
+      <ID>8</ID>
+      <Model>Tasty Wooden Tuna</Model>
+      <SerialNumber>NG9VXAEZVP</SerialNumber>
+      <TankType>StandardTank</TankType>
+    </Tank>
+    <Tank>
+      <ID>9</ID>
+      <Model>Unbranded Metal Pizza</Model>
+      <SerialNumber>7JT17JDO14</SerialNumber>
+      <TankType>StandardTank</TankType>
+    </Tank>
+  </Tanks>
+</Root>
