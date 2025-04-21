@@ -41,5 +41,19 @@ namespace Serialization.Helpers
         public const string EnterNewValue = "Enter new value:";
         public const string UpdatedField = "Updated {0} to {1}";
         public const string InvalidValueForType = "Invalid value for type {0}";
+        // Add XML element constants
+        public const string Element_Root = "Root";
+        public const string Element_Manufacturers = "Manufacturers";
+        public const string Element_Manufacturer = "Manufacturer";
+        public const string Element_Name = "Name";
+        public const string Element_Address = "Address";
+        public const string Element_IsAChildCompany = "IsAChildCompany";
+        public const string Element_Tanks = "Tanks";
+        public const string Element_Tank = "Tank";
+        public const string Element_ID = "ID";
+        public const string Element_Model = "Model";
+        public const string Element_SerialNumber = "SerialNumber";
+        public const string Element_TankType = "TankType";
+
     }
 }
