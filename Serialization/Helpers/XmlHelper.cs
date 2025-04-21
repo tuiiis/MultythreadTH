@@ -15,20 +15,20 @@ namespace Serialization.Helpers
         public static void SaveObjectsToXml(List<Manufacturer> manufacturers, List<Tank> tanks, string xmlFilePath)
         {
             var xDoc = new XDocument(
-                new XElement("Root",
-                    new XElement("Manufacturers", manufacturers.Select(m =>
-                        new XElement("Manufacturer",
-                            new XElement("Name", m.Name),
-                            new XElement("Address", m.Address),
-                            new XElement("IsAChildCompany", m.IsAChildCompany)
+new XElement(Constants.Element_Root,
+new XElement(Constants.Element_Manufacturers, manufacturers.Select(m =>
+new XElement(Constants.Element_Manufacturer,
+new XElement(Constants.Element_Name, m.Name),
+new XElement(Constants.Element_Address, m.Address),
+new XElement(Constants.Element_IsAChildCompany, m.IsAChildCompany)
                         )
                     )),
-                    new XElement("Tanks", tanks.Select(t =>
-                        new XElement("Tank",
-                            new XElement("ID", t.ID),
-                            new XElement("Model", t.Model),
-                            new XElement("SerialNumber", t.SerialNumber),
-                            new XElement("TankType", t.TankType)
+new XElement(Constants.Element_Tanks, tanks.Select(t =>
+new XElement(Constants.Element_Tank,
+new XElement(Constants.Element_ID, t.ID),
+new XElement(Constants.Element_Model, t.Model),
+new XElement(Constants.Element_SerialNumber, t.SerialNumber),
+new XElement(Constants.Element_TankType, t.TankType)
                         )
                     ))
                 )
@@ -40,20 +40,20 @@ namespace Serialization.Helpers
         {
             XDocument doc = XDocument.Load(xmlFilePath);
 
-            var manufacturersParsed = doc.Descendants("Manufacturer")
-                .Select(m => new Manufacturer(
-                    m.Element("Name")?.Value ?? string.Empty,
-                    m.Element("Address")?.Value ?? string.Empty,
-                    bool.Parse(m.Element("IsAChildCompany")?.Value ?? "false")
-                )).ToList();
+            var manufacturersParsed = doc.Descendants(Constants.Element_Manufacturer)
+                            .Select(m => new Manufacturer(
+            m.Element(Constants.Element_Name)?.Value ?? string.Empty,
+            m.Element(Constants.Element_Address)?.Value ?? string.Empty,
+            bool.Parse(m.Element(Constants.Element_IsAChildCompany)?.Value ?? "false")
+            )).ToList();
 
-            var tanksParsed = doc.Descendants("Tank")
-                .Select(t => new Tank(
-                    int.Parse(t.Element("ID")?.Value ?? "0"),
-                    t.Element("Model")?.Value ?? string.Empty,
-                    t.Element("SerialNumber")?.Value ?? string.Empty,
-                    (TankType)Enum.Parse(typeof(TankType), t.Element("TankType")?.Value ?? "StandardTank")
-                )).ToList();
+            var tanksParsed = doc.Descendants(Constants.Element_Tank)
+                            .Select(t => new Tank(
+            int.Parse(t.Element(Constants.Element_ID)?.Value ?? "0"),
+            t.Element(Constants.Element_Model)?.Value ?? string.Empty,
+            t.Element(Constants.Element_SerialNumber)?.Value ?? string.Empty,
+            (TankType)Enum.Parse(typeof(TankType), t.Element(Constants.Element_TankType)?.Value ?? "StandardTank")
+                            )).ToList();
 
             return (manufacturersParsed, tanksParsed);
         }
