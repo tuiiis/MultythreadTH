@@ -1,9 +1,8 @@
-namespace Multithreading.Models
+namespace Multithreading.Models;
+
+public enum TankType
 {
-    public enum TankType
-    {
-        Light,
-        Medium,
-        Heavy
-    }
+    Light,
+    Medium,
+    Heavy
 }

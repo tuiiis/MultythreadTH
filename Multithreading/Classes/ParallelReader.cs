@@ -1,6 +1,7 @@
-using System;
-using System.IO;
-using System.Threading;
+using System.Text;
+using System.Diagnostics;
+
+namespace Multithreading.Classes;
 
 public class ParallelReader
 {
@@ -90,5 +91,83 @@ public class ParallelReader
         t1.Join();
         t2.Join();
         _writer.Close();
+    }
+
+    public static string ReadSequentially(string filePath)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("Merged file not found. Please merge files first.", filePath);
+
+        var stopwatch = Stopwatch.StartNew();
+        string content = File.ReadAllText(filePath);
+        stopwatch.Stop();
+        Console.WriteLine($"[Sequential] Read time: {stopwatch.ElapsedMilliseconds} ms");
+        return content;
+    }
+
+    public static string ReadInTwoThreads(string filePath)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("Merged file not found. Please merge files first.", filePath);
+
+        var stopwatch = Stopwatch.StartNew();
+        long length = new FileInfo(filePath).Length;
+        long mid = length / 2;
+
+        string part1 = ReadFilePart(filePath, 0, mid);
+        string part2 = ReadFilePart(filePath, mid, length - mid);
+
+        stopwatch.Stop();
+        Console.WriteLine($"[Two Threads] Read time: {stopwatch.ElapsedMilliseconds} ms");
+        return part1 + part2;
+    }
+
+    public static string ReadInTenThreads(string filePath)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("Merged file not found. Please merge files first.", filePath);
+
+        const int threadCount = 10;
+        const int concurrencyLimit = 5;
+        var semaphore = new SemaphoreSlim(concurrencyLimit, concurrencyLimit);
+
+        var stopwatch = Stopwatch.StartNew();
+        long length = new FileInfo(filePath).Length;
+        long chunkSize = length / threadCount;
+
+        var tasks = new Task<string>[threadCount];
+        for (int i = 0; i < threadCount; i++)
+        {
+            int index = i;
+            tasks[i] = Task.Run(async () =>
+            {
+                await semaphore.WaitAsync();
+                try
+                {
+                    long start = index * chunkSize;
+                    long size = (index == threadCount - 1) ? (length - start) : chunkSize;
+                    return ReadFilePart(filePath, start, size);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            });
+        }
+
+        Task.WaitAll(tasks);
+        stopwatch.Stop();
+
+        Console.WriteLine($"[10 Threads (5 at a time)] Read time: {stopwatch.ElapsedMilliseconds} ms");
+        return string.Concat(tasks.Select(t => t.Result));
+    }
+
+    private static string ReadFilePart(string filePath, long start, long size)
+    {
+        using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        fs.Seek(start, SeekOrigin.Begin);
+        byte[] buffer = new byte[size];
+        fs.Read(buffer, 0, (int)size);
+        return Encoding.UTF8.GetString(buffer);
     }
 }
