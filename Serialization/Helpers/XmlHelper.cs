@@ -15,20 +15,20 @@ namespace Serialization.Helpers
         public static void SaveObjectsToXml(List<Manufacturer> manufacturers, List<Tank> tanks, string xmlFilePath)
         {
             var xDoc = new XDocument(
-new XElement(Constants.Element_Root,
-new XElement(Constants.Element_Manufacturers, manufacturers.Select(m =>
-new XElement(Constants.Element_Manufacturer,
-new XElement(Constants.Element_Name, m.Name),
-new XElement(Constants.Element_Address, m.Address),
-new XElement(Constants.Element_IsAChildCompany, m.IsAChildCompany)
+                            new XElement(Constants.Element_Root,
+                            new XElement(Constants.Element_Manufacturers, manufacturers.Select(m =>
+                            new XElement(Constants.Element_Manufacturer,
+                            new XElement(Constants.Element_Name, m.Name),
+                            new XElement(Constants.Element_Address, m.Address),
+                            new XElement(Constants.Element_IsAChildCompany, m.IsAChildCompany)
                         )
                     )),
-new XElement(Constants.Element_Tanks, tanks.Select(t =>
-new XElement(Constants.Element_Tank,
-new XElement(Constants.Element_ID, t.ID),
-new XElement(Constants.Element_Model, t.Model),
-new XElement(Constants.Element_SerialNumber, t.SerialNumber),
-new XElement(Constants.Element_TankType, t.TankType)
+                            new XElement(Constants.Element_Tanks, tanks.Select(t =>
+                            new XElement(Constants.Element_Tank,
+                            new XElement(Constants.Element_ID, t.ID),
+                            new XElement(Constants.Element_Model, t.Model),
+                            new XElement(Constants.Element_SerialNumber, t.SerialNumber),
+                            new XElement(Constants.Element_TankType, t.TankType)
                         )
                     ))
                 )
@@ -201,9 +201,9 @@ new XElement(Constants.Element_TankType, t.TankType)
         {
             return element.Name.LocalName switch
             {
-                "ID" => "int",
-                "IsAChildCompany" => "bool",
-                "TankType" => "enum",
+                Constants.Element_ID => "int",
+                Constants.Element_IsAChildCompany => "bool",
+                Constants.Element_TankType => "enum",
                 _ => "string"
             };
         }
@@ -212,9 +212,9 @@ new XElement(Constants.Element_TankType, t.TankType)
         {
             return node.Name switch
             {
-                "ID" => "int",
-                "IsAChildCompany" => "bool",
-                "TankType" => "enum",
+                Constants.Element_ID => "int",
+                Constants.Element_IsAChildCompany => "bool",
+                Constants.Element_TankType => "enum",
                 _ => "string"
             };
         }
@@ -228,6 +228,40 @@ new XElement(Constants.Element_TankType, t.TankType)
                 "enum" => Enum.IsDefined(typeof(TankType), value),
                 _ => true
             };
+        }
+
+        // New methods for saving individual lists
+        public static void SaveTanksToFile(List<Tank> tanks, string filePath)
+        {
+            var xDoc = new XDocument(
+                new XElement(Constants.Element_Root,
+                    new XElement(Constants.Element_Tanks, tanks.Select(t =>
+                        new XElement(Constants.Element_Tank,
+                            new XElement(Constants.Element_ID, t.ID),
+                            new XElement(Constants.Element_Model, t.Model),
+                            new XElement(Constants.Element_SerialNumber, t.SerialNumber),
+                            new XElement(Constants.Element_TankType, t.TankType)
+                        )
+                    )
+                )
+            );
+            xDoc.Save(filePath);
+        }
+
+        public static void SaveManufacturersToFile(List<Manufacturer> manufacturers, string filePath)
+        {
+            var xDoc = new XDocument(
+                new XElement(Constants.Element_Root,
+                    new XElement(Constants.Element_Manufacturers, manufacturers.Select(m =>
+                        new XElement(Constants.Element_Manufacturer,
+                            new XElement(Constants.Element_Name, m.Name),
+                            new XElement(Constants.Element_Address, m.Address),
+                            new XElement(Constants.Element_IsAChildCompany, m.IsAChildCompany)
+                        )
+                    )
+                )
+            );
+            xDoc.Save(filePath);
         }
     }
 }

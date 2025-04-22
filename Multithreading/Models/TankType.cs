@@ -1,4 +1,4 @@
-namespace Serialization.Models
+namespace Multithreading.Models
 {
     public enum TankType
     {
