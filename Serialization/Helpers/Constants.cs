@@ -1,21 +1,12 @@
+using Serialization.Models;
+
 namespace Serialization.Helpers
 {
     public static class Constants
     {
         public const string XmlFilePath = "objects.xml";
-        public static readonly string[] ObjectTypes = { "Manufacturer", "Tank" };
+        public static readonly string[] ObjectTypes = { $"{nameof(Manufacturer)}", $"{nameof(Tank)}" };
 
-        // Menu options
-        public const string MenuPrompt = "Choose an option:";
-        public const string MenuOption1 = "1. Create 10 Manufacturers and 10 Tanks";
-        public const string MenuOption2 = "2. Save objects to XML";
-        public const string MenuOption3 = "3. Display XML as text";
-        public const string MenuOption4 = "4. Parse XML to objects";
-        public const string MenuOption5 = "5. Extract 'Model' values with XDocument";
-        public const string MenuOption6 = "6. Extract 'Model' values with XMLDocument";
-        public const string MenuOption7 = "7. Edit attribute by field name (XDocument)";
-        public const string MenuOption8 = "8. Edit attribute by field name (XMLDocument)";
-        public const string MenuOption9 = "9. Exit program";
 
         // Messages
         public const string CreateInstancesFirst = "Create instances first (1.)";
@@ -41,6 +32,8 @@ namespace Serialization.Helpers
         public const string EnterNewValue = "Enter new value:";
         public const string UpdatedField = "Updated {0} to {1}";
         public const string InvalidValueForType = "Invalid value for type {0}";
+
+
         // Add XML element constants
         public const string Element_Root = "Root";
         public const string Element_Manufacturers = "Manufacturers";

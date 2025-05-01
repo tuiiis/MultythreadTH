@@ -32,7 +32,7 @@ while (true)
         case "2":
             if (manufacturers == null || tanks == null)
             {
-                Console.WriteLine(Constants.CreateInstancesFirst);
+                Console.WriteLine("Create instances first (1.)");
                 break;
             }
             XmlHelper.SaveObjectsToXml(manufacturers, tanks, Constants.XmlFilePath);
@@ -92,11 +92,11 @@ while (true)
             break;
 
         case "9":
-            Console.WriteLine(Constants.ExitingProgram);
+            Console.WriteLine("Exiting program.");
             return;
 
         default:
-            Console.WriteLine(Constants.InvalidChoice);
+            Console.WriteLine("Invalid choice. Please select a valid option.");
             break;
     }
 }

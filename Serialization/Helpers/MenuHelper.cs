@@ -13,16 +13,16 @@ namespace Serialization.Helpers
     {
         public static void ShowMenu()
         {
-            Console.WriteLine(Constants.MenuPrompt);
-            Console.WriteLine(Constants.MenuOption1);
-            Console.WriteLine(Constants.MenuOption2);
-            Console.WriteLine(Constants.MenuOption3);
-            Console.WriteLine(Constants.MenuOption4);
-            Console.WriteLine(Constants.MenuOption5);
-            Console.WriteLine(Constants.MenuOption6);
-            Console.WriteLine(Constants.MenuOption7);
-            Console.WriteLine(Constants.MenuOption8);
-            Console.WriteLine(Constants.MenuOption9);
+            Console.WriteLine("Choose an option:");
+            Console.WriteLine("1. Create 10 Manufacturers and 10 Tanks");
+            Console.WriteLine("2. Save objects to XML");
+            Console.WriteLine("3. Display XML as text");
+            Console.WriteLine("4. Parse XML to objects");
+            Console.WriteLine("5. Extract 'Model' values with XDocument");
+            Console.WriteLine("6. Extract 'Model' values with XMLDocument");
+            Console.WriteLine("7. Edit attribute by field name (XDocument)");
+            Console.WriteLine("8. Edit attribute by field name (XMLDocument)");
+            Console.WriteLine("9. Exit program");
         }
 
         public static string ReadMenuChoice()
@@ -32,11 +32,11 @@ namespace Serialization.Helpers
 
         public static string ReadObjectType()
         {
-            Console.WriteLine(string.Format(Constants.EnterObjectType, string.Join(" or ", Constants.ObjectTypes)));
+            Console.WriteLine($"Enter object type ({string.Join(" or ", Constants.ObjectTypes)}):");
             string? objectType = Console.ReadLine();
             if (string.IsNullOrEmpty(objectType) || Array.IndexOf(Constants.ObjectTypes, objectType) == -1)
             {
-                Console.WriteLine(string.Format(Constants.InvalidObjectType, string.Join(", ", Constants.ObjectTypes)));
+                Console.WriteLine($"Invalid object type. Must be one of: {string.Join(", ", Constants.ObjectTypes)}");
                 return string.Empty;
             }
             return objectType;
@@ -44,10 +44,10 @@ namespace Serialization.Helpers
 
         public static int ReadIndex(string objectType, int count)
         {
-            Console.WriteLine(string.Format(Constants.EnterObjectNumberToEdit, objectType, count));
+            Console.WriteLine($"Enter {objectType} number to edit (1-{count}):");
             if (!int.TryParse(Console.ReadLine(), out int index) || index < 1 || index > count)
             {
-                Console.WriteLine(Constants.InvalidNumber);
+                Console.WriteLine("Invalid number.");
                 return -1;
             }
             return index;
@@ -55,11 +55,11 @@ namespace Serialization.Helpers
 
         public static string ReadFieldName()
         {
-            Console.WriteLine(Constants.EnterFieldNameToEdit);
+            Console.WriteLine("Enter field name to edit:");
             string? fieldName = Console.ReadLine();
             if (string.IsNullOrEmpty(fieldName))
             {
-                Console.WriteLine(Constants.FieldNameCannotBeEmpty);
+                Console.WriteLine("Field name cannot be empty.");
                 return string.Empty;
             }
             return fieldName;
@@ -67,8 +67,8 @@ namespace Serialization.Helpers
 
         public static string ReadNewValue(string fieldName, string currentValue, string currentType)
         {
-            Console.WriteLine(string.Format(Constants.CurrentValueOfField, fieldName, currentValue, currentType));
-            Console.WriteLine(Constants.EnterNewValue);
+            Console.WriteLine($"Current value of {fieldName}: {currentValue} (Type: {currentType})");
+            Console.WriteLine("Enter new value:");
             return Console.ReadLine() ?? string.Empty;
         }
 
@@ -95,7 +95,7 @@ namespace Serialization.Helpers
         {
             if (!File.Exists(Constants.XmlFilePath))
             {
-                Console.WriteLine(Constants.NoXmlFileFound);
+                Console.WriteLine("No XML file found.");
                 return;
             }
 
@@ -105,11 +105,11 @@ namespace Serialization.Helpers
             var elements = XDocument.Load(Constants.XmlFilePath).Descendants(objectType).ToList();
             if (elements.Count == 0)
             {
-                Console.WriteLine(string.Format(Constants.NoObjectsFoundInXml, objectType));
+                Console.WriteLine($"No {objectType} objects found in XML.");
                 return;
             }
 
-            Console.WriteLine(string.Format(Constants.AvailableObjects, objectType));
+            Console.WriteLine($"Available {objectType} objects:");
             for (int i = 0; i < elements.Count; i++)
             {
                 Console.WriteLine($"{i + 1}. {XmlHelper.GetElementSummary(elements[i])}");
@@ -124,7 +124,7 @@ namespace Serialization.Helpers
             var targetElement = elements[elementIndex - 1].Element(fieldName);
             if (targetElement == null)
             {
-                Console.WriteLine(string.Format(Constants.FieldNotFound, fieldName, objectType));
+                Console.WriteLine($"Field '{fieldName}' not found in {objectType}.");
                 return;
             }
 
@@ -148,7 +148,7 @@ namespace Serialization.Helpers
         {
             if (!File.Exists(Constants.XmlFilePath))
             {
-                Console.WriteLine(Constants.NoXmlFileFound);
+                Console.WriteLine("No XML file found.");
                 return;
             }
 
@@ -160,11 +160,11 @@ namespace Serialization.Helpers
             var nodes = doc.GetElementsByTagName(objectType);
             if (nodes.Count == 0)
             {
-                Console.WriteLine(string.Format(Constants.NoObjectsFoundInXml, objectType));
+                Console.WriteLine($"No {objectType} objects found in XML.");
                 return;
             }
 
-            Console.WriteLine(string.Format(Constants.AvailableObjects, objectType));
+            Console.WriteLine($"Available {objectType} objects:");
             for (int i = 0; i < nodes.Count; i++)
             {
                 if (nodes[i] != null)
@@ -179,7 +179,7 @@ namespace Serialization.Helpers
             var selectedNode = nodes[nodeIndex - 1];
             if (selectedNode == null)
             {
-                Console.WriteLine(Constants.SelectedNodeIsNull);
+                Console.WriteLine("Selected node is null.");
                 return;
             }
 
@@ -189,7 +189,7 @@ namespace Serialization.Helpers
             var targetNode = selectedNode[fieldName];
             if (targetNode == null)
             {
-                Console.WriteLine(string.Format(Constants.FieldNotFound, fieldName, objectType));
+                Console.WriteLine($"Field '{fieldName}' not found in {objectType}.");
                 return;
             }
 
