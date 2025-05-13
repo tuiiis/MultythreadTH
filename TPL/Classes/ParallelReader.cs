@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 using System.Diagnostics;
 
@@ -8,89 +9,92 @@ public class ParallelReader
     private readonly string _file1;
     private readonly string _file2;
     private readonly string _outputFile;
-    private readonly object _lock = new object();
-    private bool _file1Turn = true;
-    private bool _file1Done = false;
-    private bool _file2Done = false;
-    private StreamWriter _writer;
 
     public ParallelReader(string file1, string file2, string outputFile)
     {
         _file1 = file1;
         _file2 = file2;
         _outputFile = outputFile;
-        _writer = new StreamWriter(outputFile, true); // append mode
     }
 
-    private void ProcessFile1()
+    public async Task StartProcessingAsync()
     {
-        using (var reader = new StreamReader(_file1))
+        var queue = new ConcurrentQueue<string>();
+        var cts = new CancellationTokenSource();
+        var tasks = new Task[]
         {
-            string? line;
-            while ((line = reader.ReadLine()) != null)
-            {
-                lock (_lock)
-                {
-                    while (!_file1Turn && !_file2Done)
-                    {
-                        System.Threading.Monitor.Wait(_lock);
-                    }
+            Task.Run(async () => await ReadFileAsync(_file1, queue, cts)),
+            Task.Run(async () => await ReadFileAsync(_file2, queue, cts)),
+            Task.Run(async () => await WriteToFileAsync(_outputFile, queue, cts))
+        };
 
-                    _writer.WriteLine(line);
-                    Console.WriteLine($"File1 wrote: {line}");
-                    _file1Turn = false;
-                    _writer.Flush();
-                    System.Threading.Monitor.PulseAll(_lock);
-                }
-            }
+        await Task.WhenAll(tasks);
+    }
 
-            lock (_lock)
-            {
-                _file1Done = true;
-                System.Threading.Monitor.PulseAll(_lock);
-            }
+    private int _readingTasksCompleted = 0;
+    private readonly object _lock = new object();
+
+    private void IncrementReadingTasksCompleted()
+    {
+        lock (_lock)
+        {
+            _readingTasksCompleted++;
         }
     }
 
-    private void ProcessFile2()
+    private bool IsReadingCompleted()
     {
-        using (var reader = new StreamReader(_file2))
+        lock (_lock)
         {
-            string? line;
-            while ((line = reader.ReadLine()) != null)
-            {
-                lock (_lock)
-                {
-                    while (_file1Turn && !_file1Done)
-                    {
-                        System.Threading.Monitor.Wait(_lock);
-                    }
-
-                    _writer.WriteLine(line);
-                    Console.WriteLine($"File2 wrote: {line}");
-                    _file1Turn = true;
-                    _writer.Flush();
-                    System.Threading.Monitor.PulseAll(_lock);
-                }
-            }
-
-            lock (_lock)
-            {
-                _file2Done = true;
-                System.Threading.Monitor.PulseAll(_lock);
-            }
+            return _readingTasksCompleted >= 2;
         }
     }
 
-    public void StartProcessing()
+    private async Task ReadFileAsync(string filePath, ConcurrentQueue<string> queue, CancellationTokenSource cts)
     {
-        Thread t1 = new Thread(ProcessFile1);
-        Thread t2 = new Thread(ProcessFile2);
-        t1.Start();
-        t2.Start();
-        t1.Join();
-        t2.Join();
-        _writer.Close();
+        try
+        {
+            using var reader = new StreamReader(filePath);
+            string? line;
+            while ((line = await reader.ReadLineAsync()) != null && !cts.IsCancellationRequested)
+            {
+                queue.Enqueue(line);
+                Console.WriteLine($"{filePath} read: {line}");
+                await Task.Yield(); // Allow other tasks to run
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            Console.WriteLine($"Reading from {filePath} was cancelled.");
+        }
+        finally
+        {
+            IncrementReadingTasksCompleted();
+        }
+    }
+
+    private async Task WriteToFileAsync(string filePath, ConcurrentQueue<string> queue, CancellationTokenSource cts)
+    {
+        using var writer = new StreamWriter(filePath, true); // append mode
+        while (!cts.IsCancellationRequested)
+        {
+            if (queue.TryDequeue(out var line))
+            {
+                await writer.WriteLineAsync(line);
+                Console.WriteLine($"Wrote: {line}");
+                await writer.FlushAsync();
+            }
+            else
+            {
+                // Check if both reading tasks are completed
+                if (IsReadingCompleted())
+                {
+                    cts.Cancel();
+                    break;
+                }
+                await Task.Delay(10, cts.Token); // Wait before checking again
+            }
+        }
     }
 
     public static string ReadSequentially(string filePath)
@@ -128,38 +132,26 @@ public class ParallelReader
             throw new FileNotFoundException("Merged file not found. Please merge files first.", filePath);
 
         const int threadCount = 10;
-        const int concurrencyLimit = 5;
-        var semaphore = new SemaphoreSlim(concurrencyLimit, concurrencyLimit);
+        const int maxDegreeOfParallelism = 5;
 
         var stopwatch = Stopwatch.StartNew();
         long length = new FileInfo(filePath).Length;
         long chunkSize = length / threadCount;
 
-        var tasks = new Task<string>[threadCount];
-        for (int i = 0; i < threadCount; i++)
-        {
-            int index = i;
-            tasks[i] = Task.Run(async () =>
-            {
-                await semaphore.WaitAsync();
-                try
-                {
-                    long start = index * chunkSize;
-                    long size = (index == threadCount - 1) ? (length - start) : chunkSize;
-                    return ReadFilePart(filePath, start, size);
-                }
-                finally
-                {
-                    semaphore.Release();
-                }
-            });
-        }
+        var options = new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism };
+        var parts = new string[threadCount];
 
-        Task.WaitAll(tasks);
+        Parallel.For(0, threadCount, options, index =>
+        {
+            long start = index * chunkSize;
+            long size = (index == threadCount - 1) ? (length - start) : chunkSize;
+            parts[index] = ReadFilePart(filePath, start, size);
+        });
+
         stopwatch.Stop();
 
-        Console.WriteLine($"[10 Threads (5 at a time)] Read time: {stopwatch.ElapsedTicks * (1_000_000_000.0 / Stopwatch.Frequency)} ns");
-        return string.Concat(tasks.Select(t => t.Result));
+        Console.WriteLine($"[10 Threads ({maxDegreeOfParallelism} at a time)] Read time: {stopwatch.ElapsedTicks * (1_000_000_000.0 / Stopwatch.Frequency)} ns");
+        return string.Concat(parts);
     }
 
     private static string ReadFilePart(string filePath, long start, long size)

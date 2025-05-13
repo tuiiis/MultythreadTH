@@ -8,7 +8,7 @@ class Program
     private static List<Tank>? tanks;
     private static List<Manufacturer>? manufacturers;
 
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         string fileNameTanks = "tanks.xml";
         string fileNameManufacturers = "manufacturers.xml";
@@ -44,7 +44,7 @@ class Program
                     }
                     break;
                 case "3":
-                    MergeManager.MergeFiles(fileNameTanks, fileNameManufacturers, fileNameMerged);
+                    await MergeManager.MergeFilesAsync(fileNameTanks, fileNameManufacturers, fileNameMerged);
                     break;
                 case "4":
                     try
