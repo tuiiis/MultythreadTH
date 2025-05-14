@@ -1,18 +1,10 @@
-﻿﻿using Bogus;
-using Multithreading.Models;
+using Bogus;
+using TPLProject.Models;
 
+namespace TPLProject.Classes;
 
-namespace Multithreading.Classes;
-
-/// <summary>
-/// Provides methods for generating fake data for Manufacturer and Tank classes.
-/// </summary>
 public static class ClassFaker
 {
-    /// <summary>
-    /// Gets a Faker instance for generating Manufacturer objects.
-    /// </summary>
-    /// <returns>A Faker instance configured for Manufacturer.</returns>
     public static Faker<Manufacturer> ManufacturerFaker => new Faker<Manufacturer>()
         .CustomInstantiator(f => new Manufacturer(
             f.Company.CompanyName(),
@@ -20,10 +12,6 @@ public static class ClassFaker
             f.Random.Bool()
         ));
 
-    /// <summary>
-    /// Gets a Faker instance for generating Tank objects.
-    /// </summary>
-    /// <returns>A Faker instance configured for Tank.</returns>
     public static Faker<Tank> TankFaker => new Faker<Tank>()
         .CustomInstantiator(f => new Tank(
             f.IndexFaker,
@@ -32,14 +20,10 @@ public static class ClassFaker
             f.PickRandom<TankType>()
         ));
 
-    /// <summary>
-    /// Generates lists of Tank and Manufacturer objects and prints them to the console.
-    /// </summary>
-    /// <returns>A tuple containing lists of generated Tank and Manufacturer objects.</returns>
     public static (List<Tank>, List<Manufacturer>) CreateInstances()
     {
-        var tanks = TankFaker.Generate(10);
-        var manufacturers = ManufacturerFaker.Generate(10);
+        var tanks = ClassFaker.TankFaker.Generate(10);
+        var manufacturers = ClassFaker.ManufacturerFaker.Generate(10);
 
         Console.WriteLine("10 tanks and 10 manufacturers created:");
 

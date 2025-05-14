@@ -3,6 +3,9 @@ using System.Diagnostics;
 
 namespace Multithreading.Classes;
 
+/// <summary>
+/// Provides functionality for reading and merging two files in parallel, as well as reading a merged file using different threading approaches.
+/// </summary>
 public class ParallelReader
 {
     private readonly string _file1;
@@ -14,6 +17,12 @@ public class ParallelReader
     private bool _file2Done = false;
     private StreamWriter _writer;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ParallelReader"/> class.
+    /// </summary>
+    /// <param name="file1">Path to the first input file.</param>
+    /// <param name="file2">Path to the second input file.</param>
+    /// <param name="outputFile">Path to the output file where merged content will be written.</param>
     public ParallelReader(string file1, string file2, string outputFile)
     {
         _file1 = file1;
@@ -22,6 +31,9 @@ public class ParallelReader
         _writer = new StreamWriter(outputFile, true); // append mode
     }
 
+    /// <summary>
+    /// Processes the first input file, reading it line by line and writing to the output file in an alternating manner with the second file.
+    /// </summary>
     private void ProcessFile1()
     {
         using (var reader = new StreamReader(_file1))
@@ -52,6 +64,9 @@ public class ParallelReader
         }
     }
 
+    /// <summary>
+    /// Processes the second input file, reading it line by line and writing to the output file in an alternating manner with the first file.
+    /// </summary>
     private void ProcessFile2()
     {
         using (var reader = new StreamReader(_file2))
@@ -82,6 +97,9 @@ public class ParallelReader
         }
     }
 
+    /// <summary>
+    /// Starts the parallel processing of the two input files.
+    /// </summary>
     public void StartProcessing()
     {
         Thread t1 = new Thread(ProcessFile1);
@@ -93,6 +111,11 @@ public class ParallelReader
         _writer.Close();
     }
 
+    /// <summary>
+    /// Reads the contents of a file sequentially.
+    /// </summary>
+    /// <param name="filePath">Path to the file to be read.</param>
+    /// <returns>The contents of the file as a string.</returns>
     public static string ReadSequentially(string filePath)
     {
         if (!File.Exists(filePath))
@@ -105,6 +128,11 @@ public class ParallelReader
         return content;
     }
 
+    /// <summary>
+    /// Reads the contents of a file using two threads.
+    /// </summary>
+    /// <param name="filePath">Path to the file to be read.</param>
+    /// <returns>The contents of the file as a string.</returns>
     public static string ReadInTwoThreads(string filePath)
     {
         if (!File.Exists(filePath))
@@ -122,6 +150,11 @@ public class ParallelReader
         return part1 + part2;
     }
 
+    /// <summary>
+    /// Reads the contents of a file using ten threads with a concurrency limit of five.
+    /// </summary>
+    /// <param name="filePath">Path to the file to be read.</param>
+    /// <returns>The contents of the file as a string.</returns>
     public static string ReadInTenThreads(string filePath)
     {
         if (!File.Exists(filePath))
@@ -162,6 +195,13 @@ public class ParallelReader
         return string.Concat(tasks.Select(t => t.Result));
     }
 
+    /// <summary>
+    /// Reads a part of a file from a specified start position with a given size.
+    /// </summary>
+    /// <param name="filePath">Path to the file to be read.</param>
+    /// <param name="start">Start position in the file.</param>
+    /// <param name="size">Size of the data to be read.</param>
+    /// <returns>The contents of the specified file part as a string.</returns>
     private static string ReadFilePart(string filePath, long start, long size)
     {
         using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
