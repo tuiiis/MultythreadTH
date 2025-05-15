@@ -1,3 +1,4 @@
+using TPL.Classes;
 using TPLProject.Classes;
 using TPLProject.Models;
 
@@ -36,7 +37,7 @@ class Program
                 case "2":
                     try
                     {
-                        ParallelSerializer.SerializeInTwoThreads(tanks, manufacturers, fileNameTanks, fileNameManufacturers);
+                        ParallelSerializer.SerializeInTwoThreads(tanks!, manufacturers!, fileNameTanks, fileNameManufacturers);
                     }
                     catch (Exception ex)
                     {
