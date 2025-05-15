@@ -3,8 +3,16 @@ using System.Xml.Linq;
 
 namespace TPLProject.Classes;
 
+/// <summary>
+/// Provides functionality for serializing Tank and Manufacturer objects to XML files in parallel.
+/// </summary>
 public class ParallelSerializer
 {
+    /// <summary>
+    /// Serializes a list of Tank objects to an XML file.
+    /// </summary>
+    /// <param name="tanks">The list of Tank objects to serialize.</param>
+    /// <param name="filename">The path to the output XML file.</param>
     public static void SerializeTanksPart(List<Tank> tanks, string filename)
     {
         try
@@ -28,6 +36,11 @@ public class ParallelSerializer
         }
     }
 
+    /// <summary>
+    /// Serializes a list of Manufacturer objects to an XML file.
+    /// </summary>
+    /// <param name="manufacturers">The list of Manufacturer objects to serialize.</param>
+    /// <param name="filename">The path to the output XML file.</param>
     public static void SerializeManufacturersPart(List<Manufacturer> manufacturers, string filename)
     {
         try
@@ -50,6 +63,13 @@ public class ParallelSerializer
         }
     }
 
+    /// <summary>
+    /// Serializes Tank and Manufacturer objects to separate XML files in parallel using two threads.
+    /// </summary>
+    /// <param name="tanks">The list of Tank objects to serialize.</param>
+    /// <param name="manufacturers">The list of Manufacturer objects to serialize.</param>
+    /// <param name="tanksFile">The path to the output XML file for Tank objects.</param>
+    /// <param name="manufacturersFile">The path to the output XML file for Manufacturer objects.</param>
     public static void SerializeInTwoThreads(List<Tank> tanks, List<Manufacturer> manufacturers, string tanksFile, string manufacturersFile)
     {
         if (tanks == null || tanks.Count < 10 || manufacturers == null || manufacturers.Count < 10)

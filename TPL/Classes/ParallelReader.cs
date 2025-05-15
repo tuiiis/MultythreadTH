@@ -4,12 +4,21 @@ using System.Diagnostics;
 
 namespace TPLProject.Classes;
 
+/// <summary>
+/// Provides functionality for reading files in parallel and writing to an output file.
+/// </summary>
 public class ParallelReader
 {
     private readonly string _file1;
     private readonly string _file2;
     private readonly string _outputFile;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ParallelReader"/> class.
+    /// </summary>
+    /// <param name="file1">The path to the first input file.</param>
+    /// <param name="file2">The path to the second input file.</param>
+    /// <param name="outputFile">The path to the output file.</param>
     public ParallelReader(string file1, string file2, string outputFile)
     {
         _file1 = file1;
@@ -17,6 +26,10 @@ public class ParallelReader
         _outputFile = outputFile;
     }
 
+    /// <summary>
+    /// Starts the parallel processing of the input files and writing to the output file.
+    /// </summary>
+    /// <returns>A Task representing the asynchronous operation.</returns>
     public async Task StartProcessingAsync()
     {
         var queue = new ConcurrentQueue<string>();
@@ -50,6 +63,13 @@ public class ParallelReader
         }
     }
 
+    /// <summary>
+    /// Reads a file asynchronously and enqueues its lines to a concurrent queue.
+    /// </summary>
+    /// <param name="filePath">The path to the file to read.</param>
+    /// <param name="queue">The concurrent queue to enqueue the lines to.</param>
+    /// <param name="cts">The cancellation token source.</param>
+    /// <returns>A Task representing the asynchronous operation.</returns>
     private async Task ReadFileAsync(string filePath, ConcurrentQueue<string> queue, CancellationTokenSource cts)
     {
         try
@@ -73,6 +93,13 @@ public class ParallelReader
         }
     }
 
+    /// <summary>
+    /// Writes lines from a concurrent queue to a file asynchronously.
+    /// </summary>
+    /// <param name="filePath">The path to the file to write to.</param>
+    /// <param name="queue">The concurrent queue to dequeue lines from.</param>
+    /// <param name="cts">The cancellation token source.</param>
+    /// <returns>A Task representing the asynchronous operation.</returns>
     private async Task WriteToFileAsync(string filePath, ConcurrentQueue<string> queue, CancellationTokenSource cts)
     {
         using var writer = new StreamWriter(filePath, true); // append mode
@@ -97,6 +124,11 @@ public class ParallelReader
         }
     }
 
+    /// <summary>
+    /// Reads the contents of a file sequentially.
+    /// </summary>
+    /// <param name="filePath">The path to the file to read.</param>
+    /// <returns>The contents of the file as a string.</returns>
     public static string ReadSequentially(string filePath)
     {
         if (!File.Exists(filePath))
@@ -109,6 +141,11 @@ public class ParallelReader
         return content;
     }
 
+    /// <summary>
+    /// Reads the contents of a file using two threads.
+    /// </summary>
+    /// <param name="filePath">The path to the file to read.</param>
+    /// <returns>The contents of the file as a string.</returns>
     public static string ReadInTwoThreads(string filePath)
     {
         if (!File.Exists(filePath))
@@ -126,6 +163,11 @@ public class ParallelReader
         return part1 + part2;
     }
 
+    /// <summary>
+    /// Reads the contents of a file using multiple threads.
+    /// </summary>
+    /// <param name="filePath">The path to the file to read.</param>
+    /// <returns>The contents of the file as a string.</returns>
     public static string ReadInTenThreads(string filePath)
     {
         if (!File.Exists(filePath))
@@ -154,6 +196,13 @@ public class ParallelReader
         return string.Concat(parts);
     }
 
+    /// <summary>
+    /// Reads a part of a file.
+    /// </summary>
+    /// <param name="filePath">The path to the file to read.</param>
+    /// <param name="start">The starting position in the file.</param>
+    /// <param name="size">The number of bytes to read.</param>
+    /// <returns>The contents of the file part as a string.</returns>
     private static string ReadFilePart(string filePath, long start, long size)
     {
         using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);

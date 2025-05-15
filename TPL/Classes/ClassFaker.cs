@@ -1,10 +1,16 @@
 using Bogus;
 using TPLProject.Models;
 
-namespace TPLProject.Classes;
+/// <summary>
+/// Provides fake data generation for Manufacturer and Tank classes.
+/// </summary>
+namespace TPL.Classes;
 
 public static class ClassFaker
 {
+    /// <summary>
+    /// Gets a Faker instance for generating Manufacturer objects.
+    /// </summary>
     public static Faker<Manufacturer> ManufacturerFaker => new Faker<Manufacturer>()
         .CustomInstantiator(f => new Manufacturer(
             f.Company.CompanyName(),
@@ -12,6 +18,9 @@ public static class ClassFaker
             f.Random.Bool()
         ));
 
+    /// <summary>
+    /// Gets a Faker instance for generating Tank objects.
+    /// </summary>
     public static Faker<Tank> TankFaker => new Faker<Tank>()
         .CustomInstantiator(f => new Tank(
             f.IndexFaker,
@@ -20,10 +29,14 @@ public static class ClassFaker
             f.PickRandom<TankType>()
         ));
 
+    /// <summary>
+    /// Creates instances of Tank and Manufacturer, and prints them to the console.
+    /// </summary>
+    /// <returns>A tuple containing a list of generated Tank objects and a list of generated Manufacturer objects.</returns>
     public static (List<Tank>, List<Manufacturer>) CreateInstances()
     {
-        var tanks = ClassFaker.TankFaker.Generate(10);
-        var manufacturers = ClassFaker.ManufacturerFaker.Generate(10);
+        var tanks = TankFaker.Generate(10);
+        var manufacturers = ManufacturerFaker.Generate(10);
 
         Console.WriteLine("10 tanks and 10 manufacturers created:");
 

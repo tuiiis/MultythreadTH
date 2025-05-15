@@ -2,8 +2,16 @@ using System.Text;
 
 namespace TPLProject.Classes;
 
+/// <summary>
+/// Provides functionality for reading files using different reading strategies.
+/// </summary>
 public class TPLReader
 {
+    /// <summary>
+    /// Reads the contents of a file sequentially.
+    /// </summary>
+    /// <param name="mergedFile">The path to the file to read.</param>
+    /// <returns>The contents of the file as a string.</returns>
     public static string ReadSequentially(string mergedFile)
     {
         try
@@ -19,6 +27,11 @@ public class TPLReader
         }
     }
 
+    /// <summary>
+    /// Reads the contents of a file using two threads.
+    /// </summary>
+    /// <param name="mergedFile">The path to the file to read.</param>
+    /// <returns>The contents of the file as a string.</returns>
     public static string ReadInTwoThreads(string mergedFile)
     {
         try
@@ -38,6 +51,11 @@ public class TPLReader
         }
     }
 
+    /// <summary>
+    /// Reads the contents of a file using ten threads.
+    /// </summary>
+    /// <param name="mergedFile">The path to the file to read.</param>
+    /// <returns>The contents of the file as a string.</returns>
     public static string ReadInTenThreads(string mergedFile)
     {
         try
@@ -62,6 +80,13 @@ public class TPLReader
         }
     }
 
+    /// <summary>
+    /// Reads a part of a file.
+    /// </summary>
+    /// <param name="filePath">The path to the file to read.</param>
+    /// <param name="start">The starting position in the file.</param>
+    /// <param name="end">The ending position in the file.</param>
+    /// <returns>The contents of the file part as a string.</returns>
     private static string ReadFilePart(string filePath, long start, long end)
     {
         using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
