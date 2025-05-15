@@ -1,6 +1,5 @@
 using TPL.Classes;
-using TPLProject.Classes;
-using TPLProject.Models;
+using TPL.Models;
 
 namespace TPL;
 

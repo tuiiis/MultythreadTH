@@ -1,4 +1,4 @@
-namespace TPLProject.Models;
+namespace TPL.Models;
 
 public class Tank
 {

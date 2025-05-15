@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Text;
 using System.Diagnostics;
 
-namespace TPLProject.Classes;
+namespace TPL.Classes;
 
 /// <summary>
 /// Provides functionality for reading files in parallel and writing to an output file.

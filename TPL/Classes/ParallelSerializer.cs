@@ -1,7 +1,7 @@
-using TPLProject.Models;
+using TPL.Models;
 using System.Xml.Linq;
 
-namespace TPLProject.Classes;
+namespace TPL.Classes;
 
 /// <summary>
 /// Provides functionality for serializing Tank and Manufacturer objects to XML files in parallel.

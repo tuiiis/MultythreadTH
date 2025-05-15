@@ -1,5 +1,5 @@
 using Bogus;
-using TPLProject.Models;
+using TPL.Models;
 
 /// <summary>
 /// Provides fake data generation for Manufacturer and Tank classes.

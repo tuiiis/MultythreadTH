@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace TPLProject.Classes;
+namespace TPL.Classes;
 
 /// <summary>
 /// Provides functionality for reading files using different reading strategies.
