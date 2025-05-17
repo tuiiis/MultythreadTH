@@ -1,15 +1,8 @@
 namespace Asynchrony.Models;
 
-public class Manufacturer
+public class Manufacturer(string name, string address, bool isAChildCompany)
 {
-    public string Name { get; set; }
-    public string Address { get; set; }
-public bool IsAChildCompany { get; set; }
-
-    public Manufacturer(string name, string address, bool isAChildCompany)
-    {
-        Name = name;
-        Address = address;
-        IsAChildCompany = isAChildCompany;
-    }
+    public string Name { get; set; } = name;
+    public string Address { get; set; } = address;
+    public bool IsAChildCompany { get; set; } = isAChildCompany;
 }
