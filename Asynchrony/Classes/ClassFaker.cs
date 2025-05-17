@@ -5,7 +5,7 @@ namespace Asynchrony.Classes;
 
 public class ClassFaker
 {
-    public static List<Tank> CreateTanks()
+    public static List<Tank> CreateTanks(int count = 50)
     {
         var manufacturerFaker = new Faker<Manufacturer>()
         .CustomInstantiator(f => new Manufacturer(
@@ -25,7 +25,7 @@ public class ClassFaker
             f.PickRandom(manufacturers)
         ));
 
-        var tanks = tankFaker.Generate(50);
+        var tanks = tankFaker.Generate(count);
 
         return tanks;
     }
