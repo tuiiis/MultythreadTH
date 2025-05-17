@@ -9,7 +9,7 @@ class Program
         while (true)
         {
             Console.WriteLine("\nChoose an option:");
-            Console.WriteLine("1. Option 1");
+            Console.WriteLine("1. Generate 50 random Tank objects");
             Console.WriteLine("2. Option 2");
             Console.WriteLine("3. Option 3");
             Console.WriteLine("Q. Quit");
@@ -20,7 +20,8 @@ class Program
             switch (choice)
             {
                 case "1":
-                    // Implement Option 1 logic here
+                    var tanks = ClassFaker.CreateTanks();
+                    DisplayHelper.DisplayTanks(tanks);
                     break;
                 case "2":
                     // Implement Option 2 logic here
