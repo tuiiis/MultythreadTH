@@ -6,6 +6,7 @@ namespace Asynchrony.Classes
 {
     public class DictionaryManager
     {
+        private const string MergedFile = "merged.xml";
         private static readonly string[] fileNames = new string[] { "TanksGroup1.xml", "TanksGroup2.xml", "TanksGroup3.xml", "TanksGroup4.xml", "TanksGroup5.xml" };
 
         public static ConcurrentDictionary<string, ConcurrentBag<Tank>> SplitByFive(List<Tank> tanks)
@@ -34,13 +35,13 @@ namespace Asynchrony.Classes
                 tasks.Add(Task.Run(() =>
                 {
                     var xDocument = new XDocument(
-                        new XElement("Tanks",
-                            kvp.Value.Select(tank => new XElement("Tank",
-                                new XElement("ID", tank.ID),
-                                new XElement("Model", tank.Model),
-                                new XElement("SerialNumber", tank.SerialNumber),
-                                new XElement("TankType", tank.TankType),
-                                new XElement("Manufacturer", tank.Manufacturer)
+                        new XElement(nameof(Tank)+"s",
+                            kvp.Value.Select(tank => new XElement(nameof(Tank),
+                                new XElement(nameof(tank.ID), tank.ID),
+                                new XElement(nameof(tank.Model), tank.Model),
+                                new XElement(nameof(tank.SerialNumber), tank.SerialNumber),
+                                new XElement(nameof(tank.TankType), tank.TankType.ToString()),
+                                new XElement(nameof(tank.Manufacturer), tank.Manufacturer)
                             ))
                         )
                     );
@@ -50,6 +51,22 @@ namespace Asynchrony.Classes
             }
 
             await Task.WhenAll(tasks);
+        }
+
+        public static async Task MergeXmlFilesAsync(ConcurrentDictionary<string, ConcurrentBag<Tank>> dictionary)
+        {
+            var mergedXDocument = new XDocument(new XElement(nameof(Tank) + "s"));
+
+            await Task.Run(() =>
+            {
+                foreach (var kvp in dictionary)
+                {
+                    var xDocument = XDocument.Load(kvp.Key);
+                    mergedXDocument.Root?.Add(xDocument.Root?.Elements());
+                }
+            });
+
+            await Task.Run(() => mergedXDocument.Save(MergedFile));
         }
     }
 }
