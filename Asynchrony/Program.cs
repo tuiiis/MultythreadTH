@@ -33,7 +33,8 @@ class Program
                 case "2":
                     if (tanks != null)
                     {
-                        // split tanks by five groups and save to XML files
+                        var xmlManager = new XMLManager();
+                        xmlManager.SaveGroupsToXML(tanks, 5);
                         Console.WriteLine("\nTanks have been divided into 5 groups and saved to XML files.");
                     }
                     else
