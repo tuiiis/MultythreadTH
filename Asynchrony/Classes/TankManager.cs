@@ -1,25 +1,21 @@
-using System.Xml.Linq;
 using Asynchrony.Models;
 using System.Collections.Concurrent;
 
 namespace Asynchrony.Classes
 {
-    public class XMLManager
+    public static class TankManager
     {
-        private readonly DisplayHelper _displayHelper;
-
-        public XMLManager()
+        public static List<List<Tank>> SplitIntoGroups(List<Tank> tanks, int numberOfGroups)
         {
-            _displayHelper = new DisplayHelper();
-        }
-
-        public void SaveGroupsToXML(List<Tank> tanks, int numberOfGroups = 5)
-        {
-            var groups = TankManager.SplitIntoGroups(tanks, numberOfGroups);
-            for (int i = 0; i < groups.Count; i++)
+            var groups = new List<List<Tank>>();
+            int tanksPerGroup = tanks.Count / numberOfGroups;
+            for (int i = 0; i < numberOfGroups; i++)
             {
-                XMLFileManager.SaveToXML($"tanks_{i+1}.xml", groups[i]);
+                int start = i * tanksPerGroup;
+                int count = (i == numberOfGroups - 1) ? tanks.Count - start : tanksPerGroup;
+                groups.Add(tanks.Skip(start).Take(count).ToList());
             }
+            return groups;
         }
 
         public static async Task<ConcurrentDictionary<string, ConcurrentBag<Tank>>> ProcessXmlFilesAsync(List<Tank> tanks)
@@ -54,7 +50,7 @@ namespace Asynchrony.Classes
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    var tanks = await ReadXmlFileAsync(file, progress);
+                    var tanks = await XMLFileManager.ReadFromXMLAsync(file, progress);
                     dictionary.TryAdd(Path.GetFileName(file), new ConcurrentBag<Tank>(tanks));
                 }));
             }
@@ -63,31 +59,31 @@ namespace Asynchrony.Classes
             return dictionary;
         }
 
-        private static async Task<List<Tank>> ReadXmlFileAsync(string filePath, IProgress<int> progress)
+        public static async Task MergeTanksToFileAsync(ConcurrentDictionary<string, ConcurrentBag<Tank>> dictionary)
         {
-            var tanks = new List<Tank>();
-            var doc = XDocument.Load(filePath);
-            var tankElements = doc.Descendants("Tank").ToList();
-            int totalTanks = tankElements.Count;
-            int processedTanks = 0;
-
-            foreach (var tankElement in tankElements)
+            if (dictionary == null || dictionary.IsEmpty)
             {
-                var tank = new Tank
-                {
-                    ID = int.Parse(tankElement.Element("ID")?.Value ?? "0"),
-                    Model = tankElement.Element("Model")?.Value ?? string.Empty,
-                    SerialNumber = tankElement.Element("SerialNumber")?.Value ?? string.Empty,
-                    TankType = (TankType)Enum.Parse(typeof(TankType), tankElement.Element("TankType")?.Value ?? "Light")
-                };
+                throw new InvalidOperationException("No tanks to merge. Please read XML files first!");
+            }
 
-                tanks.Add(tank);
-                processedTanks++;
-                progress.Report((int)((double)processedTanks / totalTanks * 100));
+            Console.WriteLine("\nMerging tanks into a single file...");
+            var progress = new Progress<int>(p => Console.Write($"\rProgress: {p}% "));
+
+            var allTanks = new List<Tank>();
+            int totalGroups = dictionary.Count;
+            int processedGroups = 0;
+
+            foreach (var group in dictionary.Values)
+            {
+                allTanks.AddRange(group);
+                processedGroups++;
+                progress.Report((int)((double)processedGroups / totalGroups * 100));
                 await Task.Delay(100); // Slow down for demo purposes
             }
 
-            return tanks;
+            XMLFileManager.SaveToXML("merged_tanks.xml", allTanks);
+            Console.WriteLine("\n\nTanks have been merged into merged_tanks.xml");
+            DisplayHelper.DisplayTanks(allTanks);
         }
     }
-}
+} 

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using Asynchrony.Classes;
 using Asynchrony.Models;
+using System.Xml.Linq;
 
 namespace Asynchrony;
 
@@ -43,13 +44,34 @@ class Program
                     }
                     break;
                 case "3":
-                    // condition: tanks != null and files exist, otherwise display a message
-                    // read XML files WITH 5 THREADS (add progress bar when reading, for demo slow down after reading one object for 100ms) and put them into a single dictionary (key = file name, value = list of tanks)
-                    // display the contents of the dictionary
+                    if (tanks == null)
+                    {
+                        Console.WriteLine("\nPlease generate tanks first!");
+                        break;
+                    }
+
+                    try
+                    {
+                        dictionary = await TankManager.ProcessXmlFilesAsync(tanks);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Console.WriteLine($"\n{ex.Message}");
+                    }
+                    catch (FileNotFoundException ex)
+                    {
+                        Console.WriteLine($"\n{ex.Message}");
+                    }
                     break;
                 case "4":
-                    //read concurrent dictionary in 5 threads and fill one file with all tanks
-                    // display the contents of the file
+                    try
+                    {
+                        await TankManager.MergeTanksToFileAsync(dictionary);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Console.WriteLine($"\n{ex.Message}");
+                    }
                     break;
                 case "5":
                     // turn on/off the sorting of the tanks every 5 seconds
@@ -62,5 +84,32 @@ class Program
                     break;
             }
         }
+    }
+
+    private static async Task<List<Tank>> ReadXmlFileAsync(string filePath, IProgress<int> progress)
+    {
+        var tanks = new List<Tank>();
+        var doc = XDocument.Load(filePath);
+        var tankElements = doc.Descendants("Tank").ToList();
+        int totalTanks = tankElements.Count;
+        int processedTanks = 0;
+
+        foreach (var tankElement in tankElements)
+        {
+            var tank = new Tank
+            {
+                ID = int.Parse(tankElement.Element("ID")?.Value ?? "0"),
+                Model = tankElement.Element("Model")?.Value ?? string.Empty,
+                SerialNumber = tankElement.Element("SerialNumber")?.Value ?? string.Empty,
+                TankType = (TankType)Enum.Parse(typeof(TankType), tankElement.Element("TankType")?.Value ?? "Light")
+            };
+
+            tanks.Add(tank);
+            processedTanks++;
+            progress.Report((int)((double)processedTanks / totalTanks * 100));
+            await Task.Delay(100); // Slow down for demo purposes
+        }
+
+        return tanks;
     }
 }
