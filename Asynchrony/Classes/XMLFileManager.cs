@@ -1,6 +1,7 @@
 using System.Xml.Linq;
 using Asynchrony.Models;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Asynchrony.Classes
 {
@@ -45,7 +46,7 @@ namespace Asynchrony.Classes
 
                 tanks.Add(tank);
                 processedTanks++;
-                progress.Report((int)((double)processedTanks / totalTanks * 100));
+                ((IProgress<int>)progress).Report((int)((double)processedTanks / totalTanks * 100));
                 await Task.Delay(100); // Slow down for demo purposes
             }
 

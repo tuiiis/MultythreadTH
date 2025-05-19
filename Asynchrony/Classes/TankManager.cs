@@ -1,5 +1,7 @@
 using Asynchrony.Models;
 using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Asynchrony.Classes
 {
@@ -77,7 +79,7 @@ namespace Asynchrony.Classes
             {
                 allTanks.AddRange(group);
                 processedGroups++;
-                progress.Report((int)((double)processedGroups / totalGroups * 100));
+                ((IProgress<int>)progress).Report((int)((double)processedGroups / totalGroups * 100));
                 await Task.Delay(100); // Slow down for demo purposes
             }
 
