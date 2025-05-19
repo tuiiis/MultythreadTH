@@ -10,6 +10,8 @@ class Program
     private static List<Tank>? tanks;
     private static ConcurrentDictionary<string, ConcurrentBag<Tank>>? dictionary;
     private static bool isSortingEnabled = false;
+    private static TankSorter? tankSorter;
+
     static async Task Main(string[] args)
     {
         while (true)
@@ -44,15 +46,10 @@ class Program
                     }
                     break;
                 case "3":
-                    if (tanks == null)
-                    {
-                        Console.WriteLine("\nPlease generate tanks first!");
-                        break;
-                    }
-
                     try
                     {
-                        dictionary = await TankManager.ProcessXmlFilesAsync(tanks);
+                        dictionary = await TankManager.ProcessXmlFilesAsync(tanks!);
+                        tankSorter = new TankSorter(dictionary);
                     }
                     catch (InvalidOperationException ex)
                     {
@@ -66,7 +63,7 @@ class Program
                 case "4":
                     try
                     {
-                        await TankManager.MergeTanksToFileAsync(dictionary);
+                        await TankManager.MergeTanksToFileAsync(dictionary!);
                     }
                     catch (InvalidOperationException ex)
                     {
@@ -74,10 +71,27 @@ class Program
                     }
                     break;
                 case "5":
-                    // turn on/off the sorting of the tanks every 5 seconds
+                    if (dictionary == null)
+                    {
+                        Console.WriteLine("\nPlease read XML files first!");
+                        break;
+                    }
+
+                    isSortingEnabled = !isSortingEnabled;
+                    if (isSortingEnabled)
+                    {
+                        tankSorter?.StartSorting();
+                        Console.WriteLine("\nTank sorting has been enabled.");
+                    }
+                    else
+                    {
+                        tankSorter?.StopSorting();
+                        Console.WriteLine("\nTank sorting has been disabled.");
+                    }
                     break;
                 case "Q":
                 case "q":
+                    tankSorter?.StopSorting();
                     return;
                 default:
                     Console.WriteLine("Invalid option. Please try again.");
