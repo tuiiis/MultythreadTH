@@ -10,9 +10,9 @@ class Program
 
     static async Task Main(string[] args)
     {
-        string fileNameTanks = "tanks.xml";
-        string fileNameManufacturers = "manufacturers.xml";
-        string fileNameMerged = "merged.xml";
+        string fileNameTanks = Constants.FileNameTanks;
+        string fileNameManufacturers = Constants.FileNameManufacturers;
+        string fileNameMerged = Constants.FileNameMerged;
 
         while (true)
         {
@@ -36,7 +36,7 @@ class Program
                 case "2":
                     try
                     {
-                        ParallelSerializer.SerializeInTwoThreads(tanks!, manufacturers!, fileNameTanks, fileNameManufacturers);
+                        ParallelSerializer.SerializeInTwoThreads(tanks!, manufacturers!, Constants.FileNameTanks, Constants.FileNameManufacturers);
                     }
                     catch (Exception ex)
                     {
@@ -44,12 +44,12 @@ class Program
                     }
                     break;
                 case "3":
-                    await MergeManager.MergeFilesAsync(fileNameTanks, fileNameManufacturers, fileNameMerged);
+                    await MergeManager.MergeFilesAsync(Constants.FileNameTanks, Constants.FileNameManufacturers, Constants.FileNameMerged);
                     break;
                 case "4":
                     try
                     {
-                        string content = ParallelReader.ReadSequentially(fileNameMerged);
+                        string content = ParallelReader.ReadSequentially(Constants.FileNameMerged);
                         Console.WriteLine("Content:\n" + content);
                     }
                     catch (FileNotFoundException ex)
@@ -60,7 +60,7 @@ class Program
                 case "5":
                     try
                     {
-                        string content = ParallelReader.ReadInTwoThreads(fileNameMerged);
+                        string content = ParallelReader.ReadInTwoThreads(Constants.FileNameMerged);
                         Console.WriteLine("Content:\n" + content);
                     }
                     catch (FileNotFoundException ex)
@@ -71,7 +71,7 @@ class Program
                 case "6":
                     try
                     {
-                        string content = ParallelReader.ReadInTenThreads(fileNameMerged);
+                        string content = ParallelReader.ReadInTenThreads(Constants.FileNameMerged);
                         Console.WriteLine("Content:\n" + content);
                     }
                     catch (FileNotFoundException ex)
