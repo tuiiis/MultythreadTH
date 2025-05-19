@@ -8,14 +8,17 @@ class Program
 {
     private static List<Tank>? tanks;
     private static ConcurrentDictionary<string, ConcurrentBag<Tank>>? dictionary;
+    private static bool isSortingEnabled = false;
     static async Task Main(string[] args)
     {
         while (true)
         {
             Console.WriteLine("\nChoose an option:");
             Console.WriteLine("1. Generate 50 random Tank objects");
-            Console.WriteLine("2. Divide the tanks into 5 groups and save to XML files");
-            Console.WriteLine("3. Merge XML files and display contents");
+            Console.WriteLine("2. Save the tanks into 5 XML files");
+            Console.WriteLine("3. Read XML files and fill a dictionary");
+            Console.WriteLine("4. Merge dictionary into a single file");
+            Console.WriteLine($"5. Turn {(isSortingEnabled ? "off" : "on")} sorting tanks every 5 seconds");
             Console.WriteLine("Q. Quit");
 
             Console.Write("Enter your choice: ");
@@ -30,8 +33,7 @@ class Program
                 case "2":
                     if (tanks != null)
                     {
-                        dictionary = DictionaryManager.SplitByFive(tanks);
-                        await DictionaryManager.SaveToXmlAsync(dictionary);
+                        // split tanks by five groups and save to XML files
                         Console.WriteLine("\nTanks have been divided into 5 groups and saved to XML files.");
                     }
                     else
@@ -40,15 +42,16 @@ class Program
                     }
                     break;
                 case "3":
-                    if (tanks != null && dictionary != null)
-                    {
-                        await DictionaryManager.MergeXmlFilesAsync(dictionary);
-                        DisplayHelper.OutputDictionaryContents(dictionary);
-                    }
-                    else
-                    {
-                        Console.WriteLine("\nPlease generate tanks and divide them into groups first!");
-                    }
+                    // condition: tanks != null and files exist, otherwise display a message
+                    // read XML files WITH 5 THREADS (add progress bar when reading, for demo slow down after reading one object for 100ms) and put them into a single dictionary (key = file name, value = list of tanks)
+                    // display the contents of the dictionary
+                    break;
+                case "4":
+                    //read concurrent dictionary in 5 threads and fill one file with all tanks
+                    // display the contents of the file
+                    break;
+                case "5":
+                    // turn on/off the sorting of the tanks every 5 seconds
                     break;
                 case "Q":
                 case "q":
