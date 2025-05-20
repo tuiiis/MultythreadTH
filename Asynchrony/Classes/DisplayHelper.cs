@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using Asynchrony.Models;
 
 namespace Asynchrony.Classes
@@ -11,8 +9,8 @@ namespace Asynchrony.Classes
         {
             foreach (var tank in tanks)
             {
-                Console.WriteLine($"Tank ID: {tank.ID}, Model: {tank.Model}, Serial Number: {tank.SerialNumber}, Type: {tank.TankType}");
-                Console.WriteLine($"Manufacturer: {tank.Manufacturer.Name}, Address: {tank.Manufacturer.Address}, Is Child Company: {tank.Manufacturer.IsAChildCompany}");
+                Console.WriteLine($"{nameof(Tank)} {nameof(tank.ID)}: {tank.ID}, {nameof(tank.Model)}: {tank.Model}, {nameof(tank.SerialNumber)}: {tank.SerialNumber}, {nameof(tank.TankType)}: {tank.TankType}");
+                Console.WriteLine($"{nameof(tank.Manufacturer)}: {tank.Manufacturer.Name}, {nameof(tank.Manufacturer.Address)}: {tank.Manufacturer.Address}, {nameof(tank.Manufacturer.IsAChildCompany)}: {tank.Manufacturer.IsAChildCompany}");
                 Console.WriteLine();
             }
         }
@@ -24,7 +22,7 @@ namespace Asynchrony.Classes
                 Console.WriteLine($"Group: {kvp.Key}");
                 foreach (var tank in kvp.Value)
                 {
-                    Console.WriteLine($"ID: {tank.ID}, Model: {tank.Model}, SerialNumber: {tank.SerialNumber}, TankType: {tank.TankType}, Manufacturer: {tank.Manufacturer}");
+                    Console.WriteLine($"{nameof(tank.ID)}: {tank.ID}, {nameof(tank.Model)}: {tank.Model}, {nameof(tank.SerialNumber)}: {tank.SerialNumber}, {nameof(tank.TankType)}: {tank.TankType}, {nameof(tank.Manufacturer)}: {tank.Manufacturer}");
                 }
                 Console.WriteLine();
             }

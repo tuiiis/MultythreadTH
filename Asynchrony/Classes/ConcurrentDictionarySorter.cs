@@ -3,15 +3,17 @@ using System.Collections.Concurrent;
 
 namespace Asynchrony.Classes
 {
-    public class TankSorter
+    public class ConcurrentDictionarySorter<T> where T : class
     {
         private CancellationTokenSource? _cancellationTokenSource;
         private Task? _sortingTask;
-        private readonly ConcurrentDictionary<string, ConcurrentBag<Tank>> _dictionary;
+        private readonly ConcurrentDictionary<string, ConcurrentBag<T>> _dictionary;
+        private readonly Func<T, object> _sortKeySelector;
 
-        public TankSorter(ConcurrentDictionary<string, ConcurrentBag<Tank>> dictionary)
+        public ConcurrentDictionarySorter(ConcurrentDictionary<string, ConcurrentBag<T>> dictionary, Func<T, object> sortKeySelector)
         {
             _dictionary = dictionary;
+            _sortKeySelector = sortKeySelector;
         }
 
         public void StartSorting()
@@ -28,8 +30,8 @@ namespace Asynchrony.Classes
                 {
                     foreach (var kvp in _dictionary)
                     {
-                        var sortedTanks = kvp.Value.OrderBy(t => t.ID).ToList();
-                        _dictionary[kvp.Key] = new ConcurrentBag<Tank>(sortedTanks);
+                        var sortedItems = kvp.Value.OrderBy(_sortKeySelector).ToList();
+                        _dictionary[kvp.Key] = new ConcurrentBag<T>(sortedItems);
                     }
                     await Task.Delay(5000, _cancellationTokenSource.Token);
                 }

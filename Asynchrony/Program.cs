@@ -9,8 +9,7 @@ class Program
 {
     private static List<Tank>? tanks;
     private static ConcurrentDictionary<string, ConcurrentBag<Tank>>? dictionary;
-    private static bool isSortingEnabled = false;
-    private static TankSorter? tankSorter;
+    private static readonly XMLManager _xmlManager = new();
 
     static async Task Main(string[] args)
     {
@@ -21,7 +20,7 @@ class Program
             Console.WriteLine("2. Save the tanks into 5 XML files");
             Console.WriteLine("3. Read XML files and fill a dictionary");
             Console.WriteLine("4. Merge dictionary into a single file");
-            Console.WriteLine($"5. Turn {(isSortingEnabled ? "off" : "on")} sorting tanks every 5 seconds");
+            Console.WriteLine($"5. Turn {(_xmlManager.IsSortingEnabled ? "off" : "on")} sorting tanks every 5 seconds");
             Console.WriteLine("Q. Quit");
 
             Console.Write("Enter your choice: ");
@@ -36,9 +35,8 @@ class Program
                 case "2":
                     if (tanks != null)
                     {
-                        var xmlManager = new XMLManager();
-                        xmlManager.SaveGroupsToXML(tanks, 5);
-                        Console.WriteLine("\nTanks have been divided into 5 groups and saved to XML files.");
+                        XMLManager.SaveGroupsToXML(tanks, 5);
+                        Console.WriteLine($"\nTanks have been divided into 5 groups and saved to {nameof(FileConstants.TankFilePattern)} files.");
                     }
                     else
                     {
@@ -48,8 +46,7 @@ class Program
                 case "3":
                     try
                     {
-                        dictionary = await TankManager.ProcessXmlFilesAsync(tanks!);
-                        tankSorter = new TankSorter(dictionary);
+                        dictionary = await ClassManager.ProcessXmlFilesAsync(tanks!);
                     }
                     catch (InvalidOperationException ex)
                     {
@@ -63,7 +60,7 @@ class Program
                 case "4":
                     try
                     {
-                        await TankManager.MergeTanksToFileAsync(dictionary!);
+                        await ClassManager.MergeTanksToFileAsync(dictionary!);
                     }
                     catch (InvalidOperationException ex)
                     {
@@ -77,53 +74,25 @@ class Program
                         break;
                     }
 
-                    isSortingEnabled = !isSortingEnabled;
-                    if (isSortingEnabled)
+                    if (_xmlManager.IsSortingEnabled)
                     {
-                        tankSorter?.StartSorting();
-                        Console.WriteLine("\nTank sorting has been enabled.");
+                        _xmlManager.StopSorting();
+                        Console.WriteLine("\nTank sorting has been disabled.");
                     }
                     else
                     {
-                        tankSorter?.StopSorting();
-                        Console.WriteLine("\nTank sorting has been disabled.");
+                        _xmlManager.StartSorting(dictionary);
+                        Console.WriteLine("\nTank sorting has been enabled.");
                     }
                     break;
                 case "Q":
                 case "q":
-                    tankSorter?.StopSorting();
+                    _xmlManager.StopSorting();
                     return;
                 default:
                     Console.WriteLine("Invalid option. Please try again.");
                     break;
             }
         }
-    }
-
-    private static async Task<List<Tank>> ReadXmlFileAsync(string filePath, IProgress<int> progress)
-    {
-        var tanks = new List<Tank>();
-        var doc = XDocument.Load(filePath);
-        var tankElements = doc.Descendants("Tank").ToList();
-        int totalTanks = tankElements.Count;
-        int processedTanks = 0;
-
-        foreach (var tankElement in tankElements)
-        {
-            var tank = new Tank
-            {
-                ID = int.Parse(tankElement.Element("ID")?.Value ?? "0"),
-                Model = tankElement.Element("Model")?.Value ?? string.Empty,
-                SerialNumber = tankElement.Element("SerialNumber")?.Value ?? string.Empty,
-                TankType = (TankType)Enum.Parse(typeof(TankType), tankElement.Element("TankType")?.Value ?? "Light")
-            };
-
-            tanks.Add(tank);
-            processedTanks++;
-            progress.Report((int)((double)processedTanks / totalTanks * 100));
-            await Task.Delay(100); // Slow down for demo purposes
-        }
-
-        return tanks;
     }
 }

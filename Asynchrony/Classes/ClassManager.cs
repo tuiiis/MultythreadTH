@@ -1,11 +1,9 @@
 using Asynchrony.Models;
 using System.Collections.Concurrent;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Asynchrony.Classes
 {
-    public static class TankManager
+    public static class ClassManager
     {
         public static List<List<Tank>> SplitIntoGroups(List<Tank> tanks, int numberOfGroups)
         {
@@ -39,10 +37,10 @@ namespace Asynchrony.Classes
 
         private static async Task<ConcurrentDictionary<string, ConcurrentBag<Tank>>> ReadXmlFilesAsync(IProgress<int> progress)
         {
-            var xmlFiles = Directory.GetFiles(".", "tanks_*.xml");
+            var xmlFiles = Directory.GetFiles(".", FileConstants.TankFilePattern);
             if (xmlFiles.Length == 0)
             {
-                throw new FileNotFoundException("No XML files found. Please save tanks to XML files first!");
+                throw new FileNotFoundException($"No {nameof(FileConstants.TankFilePattern)} files found. Please save tanks to XML files first!");
             }
 
             var dictionary = new ConcurrentDictionary<string, ConcurrentBag<Tank>>();
@@ -52,7 +50,7 @@ namespace Asynchrony.Classes
             {
                 tasks.Add(Task.Run(async () =>
                 {
-                    var tanks = await XMLFileManager.ReadFromXMLAsync(file, progress);
+                    var tanks = await XMLManager.ReadFromXMLAsync(file, progress);
                     dictionary.TryAdd(Path.GetFileName(file), new ConcurrentBag<Tank>(tanks));
                 }));
             }
@@ -83,8 +81,8 @@ namespace Asynchrony.Classes
                 await Task.Delay(100); // Slow down for demo purposes
             }
 
-            XMLFileManager.SaveToXML("merged_tanks.xml", allTanks);
-            Console.WriteLine("\n\nTanks have been merged into merged_tanks.xml");
+            XMLManager.SaveToXML(FileConstants.MergedTanksFile, allTanks);
+            Console.WriteLine($"\n\nTanks have been merged into {FileConstants.MergedTanksFile}");
             DisplayHelper.DisplayTanks(allTanks);
         }
     }
