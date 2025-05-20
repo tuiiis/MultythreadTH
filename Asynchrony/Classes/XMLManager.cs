@@ -24,12 +24,12 @@ namespace Asynchrony.Classes
                 tanks.Add(new Tank
                 {
                     ID = i + 1,
-                    Model = $"Model_{_random.Next(1, 100)}",
+                    Model = $"{nameof(Tank.Model)}_{_random.Next(1, 100)}",
                     SerialNumber = $"SN{_random.Next(1000, 9999)}",
                     TankType = (TankType)_random.Next(0, 3),
                     Manufacturer = new Manufacturer(
-                        $"Manufacturer_{_random.Next(1, 10)}",
-                        $"Address_{_random.Next(1, 100)}",
+                        $"{nameof(Manufacturer)}_{_random.Next(1, 10)}",
+                        $"{nameof(Manufacturer.Address)}_{_random.Next(1, 100)}",
                         _faker.Random.Bool()
                     )
                 });
@@ -51,7 +51,7 @@ namespace Asynchrony.Classes
         {
             foreach (var kvp in dictionary)
             {
-                Console.WriteLine($"Group: {kvp.Key}");
+                Console.WriteLine($"{nameof(dictionary)}: {kvp.Key}");
                 foreach (var tank in kvp.Value)
                 {
                     Console.WriteLine($"{nameof(tank.ID)}: {tank.ID}, {nameof(tank.Model)}: {tank.Model}, {nameof(tank.SerialNumber)}: {tank.SerialNumber}, {nameof(tank.TankType)}: {tank.TankType}, {nameof(tank.Manufacturer)}: {tank.Manufacturer}");
@@ -92,7 +92,11 @@ namespace Asynchrony.Classes
                             new XElement(nameof(Tank.Model), t.Model),
                             new XElement(nameof(Tank.SerialNumber), t.SerialNumber),
                             new XElement(nameof(Tank.TankType), t.TankType),
-                            new XElement(nameof(Tank.Manufacturer), t.Manufacturer)
+                            new XElement(nameof(Tank.Manufacturer),
+                                new XElement(nameof(Manufacturer.Name), t.Manufacturer.Name),
+                                new XElement(nameof(Manufacturer.Address), t.Manufacturer.Address),
+                                new XElement(nameof(Manufacturer.IsAChildCompany), t.Manufacturer.IsAChildCompany)
+                            )
                         )
                     )
                 )
@@ -113,9 +117,9 @@ namespace Asynchrony.Classes
             {
                 var manufacturerElement = tankElement.Element(nameof(Tank.Manufacturer));
                 var manufacturer = new Manufacturer(
-                    manufacturerElement?.Element("Name")?.Value ?? "Unknown",
-                    manufacturerElement?.Element("Address")?.Value ?? "Unknown",
-                    bool.Parse(manufacturerElement?.Element("IsAChildCompany")?.Value ?? "false")
+                    manufacturerElement?.Element(nameof(Manufacturer.Name))?.Value ?? "Unknown",
+                    manufacturerElement?.Element(nameof(Manufacturer.Address))?.Value ?? "Unknown",
+                    bool.Parse(manufacturerElement?.Element(nameof(Manufacturer.IsAChildCompany))?.Value ?? "false")
                 );
 
                 var tank = new Tank
@@ -200,7 +204,7 @@ namespace Asynchrony.Classes
             }
 
             SaveToXML(FileConstants.MergedTanksFile, allTanks);
-            Console.WriteLine($"\n\nTanks have been merged into {FileConstants.MergedTanksFile}");
+            Console.WriteLine($"\n\nTanks have been merged into {nameof(FileConstants.MergedTanksFile)}");
             DisplayTanks(allTanks);
         }
 
