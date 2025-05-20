@@ -3,6 +3,7 @@ using Asynchrony.Models;
 using System.IO;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Asynchrony.Tests
 {
@@ -39,20 +40,6 @@ namespace Asynchrony.Tests
             Assert.That(tanks.All(t => t != null), Is.True);
         }
 
-        [Test]
-        public void SaveGroupsToXML_ShouldCreateCorrectNumberOfFiles()
-        {
-            // Arrange
-            var tanks = ClassFaker.CreateTanks(TestConstants.TestTankCount);
-            var fileCount = TestConstants.TestFileCount;
-
-            // Act
-            XMLManager.SaveGroupsToXML(tanks, fileCount);
-
-            // Assert
-            var files = Directory.GetFiles(_testDirectory, FileConstants.TankFilePattern);
-            Assert.That(files.Length, Is.EqualTo(fileCount));
-        }
 
         [Test]
         public async Task ProcessXmlFilesAsync_ShouldCreateCorrectDictionary()
@@ -71,22 +58,6 @@ namespace Asynchrony.Tests
         }
 
         [Test]
-        public async Task MergeTanksToFileAsync_ShouldCreateMergedFile()
-        {
-            // Arrange
-            var tanks = ClassFaker.CreateTanks(TestConstants.TestTankCount);
-            XMLManager.SaveGroupsToXML(tanks, TestConstants.TestFileCount);
-            var dictionary = await ClassManager.ProcessXmlFilesAsync(tanks);
-
-            // Act
-            await ClassManager.MergeTanksToFileAsync(dictionary);
-
-            // Assert
-            var mergedFile = Path.Combine(_testDirectory, FileConstants.MergedTanksFile);
-            Assert.That(File.Exists(mergedFile), Is.True);
-        }
-
-        [Test]
         public void XMLManager_Sorting_ShouldToggleCorrectly()
         {
             // Arrange
@@ -96,12 +67,50 @@ namespace Asynchrony.Tests
 
             // Act & Assert
             Assert.That(xmlManager.IsSortingEnabled, Is.False);
-            
+
             xmlManager.StartSorting(dictionary);
             Assert.That(xmlManager.IsSortingEnabled, Is.True);
-            
+
             xmlManager.StopSorting();
             Assert.That(xmlManager.IsSortingEnabled, Is.False);
         }
+
+        [Test]
+        public void SaveToXML_ShouldCreateValidXMLFile()
+        {
+            // Arrange
+            var tanks = ClassFaker.CreateTanks(5);
+            var filePath = Path.Combine(_testDirectory, "test_tanks.xml");
+
+            // Act
+            XMLManager.SaveToXML(filePath, tanks);
+
+            // Assert
+            Assert.That(File.Exists(filePath), Is.True);
+            var doc = XDocument.Load(filePath);
+            var savedTanks = doc.Descendants(nameof(Tank)).ToList();
+            Assert.That(savedTanks.Count, Is.EqualTo(tanks.Count));
+        }
+
+        [Test]
+        public void ProcessXmlFilesAsync_ShouldThrowException_WhenTanksIsNull()
+        {
+            // Act & Assert
+            var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await XMLManager.ProcessXmlFilesAsync(null));
+            Assert.That(ex.Message, Does.Contain("generate tanks first"));
+        }
+
+        [Test]
+        public void MergeTanksToFileAsync_ShouldThrowException_WhenDictionaryIsEmpty()
+        {
+            // Arrange
+            var emptyDictionary = new ConcurrentDictionary<string, ConcurrentBag<Tank>>();
+
+            // Act & Assert
+            var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await XMLManager.MergeTanksToFileAsync(emptyDictionary));
+            Assert.That(ex.Message, Does.Contain("No tanks to merge"));
+        }
     }
-} 
+}

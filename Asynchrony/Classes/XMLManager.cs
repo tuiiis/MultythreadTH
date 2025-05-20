@@ -111,12 +111,20 @@ namespace Asynchrony.Classes
 
             foreach (var tankElement in tankElements)
             {
+                var manufacturerElement = tankElement.Element(nameof(Tank.Manufacturer));
+                var manufacturer = new Manufacturer(
+                    manufacturerElement?.Element("Name")?.Value ?? "Unknown",
+                    manufacturerElement?.Element("Address")?.Value ?? "Unknown",
+                    bool.Parse(manufacturerElement?.Element("IsAChildCompany")?.Value ?? "false")
+                );
+
                 var tank = new Tank
                 {
                     ID = int.Parse(tankElement.Element(nameof(Tank.ID))?.Value ?? "0"),
                     Model = tankElement.Element(nameof(Tank.Model))?.Value ?? string.Empty,
                     SerialNumber = tankElement.Element(nameof(Tank.SerialNumber))?.Value ?? string.Empty,
-                    TankType = (TankType)Enum.Parse(typeof(TankType), tankElement.Element(nameof(Tank.TankType))?.Value ?? nameof(TankType.Light))
+                    TankType = (TankType)Enum.Parse(typeof(TankType), tankElement.Element(nameof(Tank.TankType))?.Value ?? nameof(TankType.Light)),
+                    Manufacturer = manufacturer
                 };
 
                 tanks.Add(tank);
