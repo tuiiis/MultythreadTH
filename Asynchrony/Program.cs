@@ -5,12 +5,20 @@ using System.Xml.Linq;
 
 namespace Asynchrony;
 
+/// <summary>
+/// The main entry point for the application.
+/// </summary>
 class Program
 {
     private static List<Tank>? tanks;
     private static ConcurrentDictionary<string, ConcurrentBag<Tank>>? dictionary;
     private static readonly XMLManager _xmlManager = new();
 
+    /// <summary>
+    /// The main method that runs the application loop.
+    /// </summary>
+    /// <param name="args">Command line arguments.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     static async Task Main(string[] args)
     {
         while (true)

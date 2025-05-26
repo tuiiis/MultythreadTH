@@ -8,6 +8,9 @@ using System.Linq;
 
 namespace Asynchrony.Classes
 {
+    /// <summary>
+    /// A class for managing XML operations related to tank data.
+    /// </summary>
     public class XMLManager
     {
         private static readonly Random _random = new();
@@ -16,6 +19,11 @@ namespace Asynchrony.Classes
         private Task? _sortingTask;
         private bool _isSortingEnabled;
 
+        /// <summary>
+        /// Creates a specified number of tank objects.
+        /// </summary>
+        /// <param name="count">The number of tank objects to create.</param>
+        /// <returns>A list of tank objects.</returns>
         public static List<Tank> CreateTanks(int count)
         {
             var tanks = new List<Tank>();
@@ -37,6 +45,10 @@ namespace Asynchrony.Classes
             return tanks;
         }
 
+        /// <summary>
+        /// Displays the details of a list of tanks.
+        /// </summary>
+        /// <param name="tanks">The list of tanks to display.</param>
         public static void DisplayTanks(List<Tank> tanks)
         {
             foreach (var tank in tanks)
@@ -47,6 +59,10 @@ namespace Asynchrony.Classes
             }
         }
 
+        /// <summary>
+        /// Outputs the contents of a dictionary containing tank data.
+        /// </summary>
+        /// <param name="dictionary">The dictionary to output.</param>
         public static void OutputDictionaryContents(ConcurrentDictionary<string, ConcurrentBag<Tank>> dictionary)
         {
             foreach (var kvp in dictionary)
@@ -60,6 +76,11 @@ namespace Asynchrony.Classes
             }
         }
 
+        /// <summary>
+        /// Saves a list of tanks into XML files, divided into groups.
+        /// </summary>
+        /// <param name="tanks">The list of tanks to save.</param>
+        /// <param name="numberOfGroups">The number of groups to divide the tanks into.</param>
         public static void SaveGroupsToXML(List<Tank> tanks, int numberOfGroups)
         {
             var groups = SplitIntoGroups(tanks, numberOfGroups);
@@ -69,6 +90,12 @@ namespace Asynchrony.Classes
             }
         }
 
+        /// <summary>
+        /// Splits a list of tanks into a specified number of groups.
+        /// </summary>
+        /// <param name="tanks">The list of tanks to split.</param>
+        /// <param name="numberOfGroups">The number of groups to split the tanks into.</param>
+        /// <returns>A list of lists, each containing a group of tanks.</returns>
         private static List<List<Tank>> SplitIntoGroups(List<Tank> tanks, int numberOfGroups)
         {
             var groups = new List<List<Tank>>();
@@ -82,6 +109,11 @@ namespace Asynchrony.Classes
             return groups;
         }
 
+        /// <summary>
+        /// Saves a list of tanks to an XML file.
+        /// </summary>
+        /// <param name="filePath">The path of the XML file to save to.</param>
+        /// <param name="tanks">The list of tanks to save.</param>
         public static void SaveToXML(string filePath, IEnumerable<Tank> tanks)
         {
             var xDoc = new XDocument(
@@ -105,6 +137,12 @@ namespace Asynchrony.Classes
             xDoc.Save(filePath);
         }
 
+        /// <summary>
+        /// Reads tank data from an XML file.
+        /// </summary>
+        /// <param name="filePath">The path of the XML file to read from.</param>
+        /// <param name="progress">Reports the progress of the operation.</param>
+        /// <returns>A list of tank objects.</returns>
         public static async Task<List<Tank>> ReadFromXMLAsync(string filePath, IProgress<int> progress)
         {
             var tanks = new List<Tank>();
@@ -140,6 +178,12 @@ namespace Asynchrony.Classes
             return tanks;
         }
 
+        /// <summary>
+        /// Processes XML files containing tank data and stores them in a dictionary.
+        /// </summary>
+        /// <param name="tanks">The list of tanks to process.</param>
+        /// <returns>A concurrent dictionary containing tank data from XML files.</returns>
+        /// <exception cref="InvalidOperationException">Thrown when tanks are not generated.</exception>
         public static async Task<ConcurrentDictionary<string, ConcurrentBag<Tank>>> ProcessXmlFilesAsync(List<Tank> tanks)
         {
             if (tanks == null)
@@ -157,6 +201,12 @@ namespace Asynchrony.Classes
             return dictionary;
         }
 
+        /// <summary>
+        /// Reads tank data from XML files and stores them in a dictionary.
+        /// </summary>
+        /// <param name="progress">Reports the progress of the operation.</param>
+        /// <returns>A concurrent dictionary containing tank data from XML files.</returns>
+        /// <exception cref="FileNotFoundException">Thrown when no XML files are found.</exception>
         private static async Task<ConcurrentDictionary<string, ConcurrentBag<Tank>>> ReadXmlFilesAsync(IProgress<int> progress)
         {
             var xmlFiles = Directory.GetFiles(".", FileConstants.TankFilePattern);
@@ -181,6 +231,11 @@ namespace Asynchrony.Classes
             return dictionary;
         }
 
+        /// <summary>
+        /// Merges tank data from a dictionary into a single XML file.
+        /// </summary>
+        /// <param name="dictionary">The dictionary containing tank data to merge.</param>
+        /// <exception cref="InvalidOperationException">Thrown when no tanks are available to merge.</exception>
         public static async Task MergeTanksToFileAsync(ConcurrentDictionary<string, ConcurrentBag<Tank>> dictionary)
         {
             if (dictionary == null || dictionary.IsEmpty)
@@ -208,7 +263,10 @@ namespace Asynchrony.Classes
             DisplayTanks(allTanks);
         }
 
-        // These methods need to remain instance methods as they use instance fields
+        /// <summary>
+        /// Starts the sorting process for a dictionary of tanks.
+        /// </summary>
+        /// <param name="dictionary">The dictionary to sort.</param>
         public void StartSorting(ConcurrentDictionary<string, ConcurrentBag<Tank>> dictionary)
         {
             if (_sortingTask != null && !_sortingTask.IsCompleted)
@@ -232,6 +290,9 @@ namespace Asynchrony.Classes
             _isSortingEnabled = true;
         }
 
+        /// <summary>
+        /// Stops the sorting process.
+        /// </summary>
         public void StopSorting()
         {
             _cancellationTokenSource?.Cancel();
@@ -242,6 +303,9 @@ namespace Asynchrony.Classes
             _isSortingEnabled = false;
         }
 
+        /// <summary>
+        /// Gets a value indicating whether sorting is enabled.
+        /// </summary>
         public bool IsSortingEnabled => _isSortingEnabled;
     }
 }

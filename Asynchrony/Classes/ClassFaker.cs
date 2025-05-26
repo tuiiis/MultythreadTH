@@ -3,8 +3,16 @@ using Bogus;
 
 namespace Asynchrony.Classes;
 
+/// <summary>
+/// A utility class for generating fake tank data.
+/// </summary>
 public class ClassFaker
 {
+    /// <summary>
+    /// Creates a specified number of fake tank objects.
+    /// </summary>
+    /// <param name="count">The number of tank objects to create.</param>
+    /// <returns>A list of fake tank objects.</returns>
     public static List<Tank> CreateTanks(int count = 50)
     {
         var manufacturerFaker = new Faker<Manufacturer>()

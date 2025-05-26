@@ -3,8 +3,15 @@ using Asynchrony.Models;
 
 namespace Asynchrony.Classes
 {
+    /// <summary>
+    /// A utility class for displaying tank data.
+    /// </summary>
     public class DisplayHelper
     {
+        /// <summary>
+        /// Displays the details of a list of tanks.
+        /// </summary>
+        /// <param name="tanks">The list of tanks to display.</param>
         public static void DisplayTanks(List<Tank> tanks)
         {
             foreach (var tank in tanks)
@@ -15,6 +22,10 @@ namespace Asynchrony.Classes
             }
         }
 
+        /// <summary>
+        /// Outputs the contents of a dictionary containing tank data.
+        /// </summary>
+        /// <param name="dictionary">The dictionary to output.</param>
         public static void OutputDictionaryContents(ConcurrentDictionary<string, ConcurrentBag<Tank>> dictionary)
         {
             foreach (var kvp in dictionary)
