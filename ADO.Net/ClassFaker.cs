@@ -25,25 +25,6 @@ public class ClassFaker
         return manufacturerFaker.Generate(count);
     }
 
-    // /// <summary>
-    // /// Creates a specified number of fake tank objects for given manufacturers.
-    // /// </summary>
-    // /// <param name="manufacturers">List of manufacturers to associate tanks with.</param>
-    // /// <param name="count">The number of tank objects to create.</param>
-    // /// <returns>A list of fake tank objects.</returns>
-    // public static List<Tank> CreateTanks(List<Manufacturer> manufacturers, int count = 30)
-    // {
-    //     var tankFaker = new Faker<Tank>()
-    //         .CustomInstantiator(f => new Tank(
-    //             f.Commerce.ProductName(),
-    //             f.Random.AlphaNumeric(10).ToUpper(),
-    //             f.PickRandom<TankType>(),
-    //             f.PickRandom(manufacturers).Id
-    //         ));
-
-    //     return tankFaker.Generate(count);
-    // }
-
     public static Tank CreateTank(Manufacturer manufacturer)
     {
         var tankFaker = new Faker<Tank>()

@@ -39,7 +39,7 @@ while (true)
     Console.WriteLine("4. Show tanks by manufacturer ID");
     Console.WriteLine("5. Exit");
 
-    string choice = Console.ReadLine();
+    string? choice = Console.ReadLine();
 
     try
     {
@@ -58,34 +58,7 @@ while (true)
                 break;
 
             case "4":
-                Console.WriteLine("Enter manufacturer ID (GUID):");
-                string manufacturerIdStr = Console.ReadLine() ?? throw new ArgumentNullException("Manufacturer ID cannot be null");
-                
-                if (!Guid.TryParse(manufacturerIdStr, out Guid manufacturerId))
-                {
-                    Console.WriteLine("Invalid GUID format. Please enter a valid GUID.");
-                    break;
-                }
-
-                var tanks = await dbService.GetTanksByManufacturerIdAsync(manufacturerId);
-                if (tanks.Count == 0)
-                {
-                    Console.WriteLine("No tanks found for this manufacturer.");
-                    break;
-                }
-
-                Console.WriteLine("\nTanks for manufacturer:");
-                foreach (var tank in tanks)
-                {
-                    Console.WriteLine($"\nTank ID: {tank.Id}");
-                    Console.WriteLine($"Model: {tank.Model}");
-                    Console.WriteLine($"Serial Number: {tank.SerialNumber}");
-                    Console.WriteLine($"Type: {tank.TankType}");
-                    Console.WriteLine($"Manufacturer: {tank.Manufacturer.Name}");
-                    Console.WriteLine($"Manufacturer Address: {tank.Manufacturer.Address}");
-                    Console.WriteLine($"Is Child Company: {tank.Manufacturer.IsAChildCompany}");
-                    Console.WriteLine("----------------------------------------");
-                }
+                await dbService.ShowTanksByManufacturerIdInteractiveAsync();
                 break;
 
             case "5":
