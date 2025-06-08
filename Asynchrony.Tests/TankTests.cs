@@ -4,8 +4,6 @@ using System.IO;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using System.Linq;
-using NUnit.Framework;
 
 namespace Asynchrony.Tests
 {

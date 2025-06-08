@@ -1,0 +1,192 @@
+﻿using Microsoft.Extensions.Configuration;
+using Npgsql;
+using ADO.Net.Models;
+using System.Data.Common;
+
+namespace ADO.Net;
+
+public class DBService
+{
+    private readonly NpgsqlConnection _connection;
+
+    public DBService(NpgsqlConnection connection)
+    {
+        _connection = connection;
+    }
+
+    public void CreateTables()
+    {
+        string createManufacturer = @"
+        CREATE TABLE IF NOT EXISTS Manufacturer (
+        Id UUID PRIMARY KEY,
+        Name VARCHAR(100) NOT NULL,
+        Address VARCHAR(200),
+        IsAChildCompany BOOLEAN);";
+
+        string createTank = @"
+        CREATE TABLE IF NOT EXISTS Tank (
+        Id UUID PRIMARY KEY,
+        Model VARCHAR(100) NOT NULL,
+        SerialNumber VARCHAR(100),
+        TankType INTEGER,
+        ManufacturerId UUID,
+        FOREIGN KEY (ManufacturerId) REFERENCES Manufacturer(Id));";
+
+        if (_connection.State != System.Data.ConnectionState.Open)
+        {
+            _connection.Open();
+        }
+
+        using (var cmd1 = new NpgsqlCommand(createManufacturer, _connection))
+        {
+            cmd1.ExecuteNonQuery();
+        }
+
+        using (var cmd2 = new NpgsqlCommand(createTank, _connection))
+        {
+            cmd2.ExecuteNonQuery();
+        }
+    }
+
+    public async Task<Guid> InsertManufacturerAsync(Manufacturer manufacturer)
+    {
+        if (_connection.State != System.Data.ConnectionState.Open)
+        {
+            await _connection.OpenAsync();
+        }
+
+        string sql = @"
+            INSERT INTO Manufacturer (Id, Name, Address, IsAChildCompany)
+            VALUES (@id, @name, @address, @isChild)
+            RETURNING Id;";
+
+        using var cmd = new NpgsqlCommand(sql, _connection);
+        cmd.Parameters.AddWithValue("id", manufacturer.Id);
+        cmd.Parameters.AddWithValue("name", manufacturer.Name);
+        cmd.Parameters.AddWithValue("address", manufacturer.Address);
+        cmd.Parameters.AddWithValue("isChild", manufacturer.IsAChildCompany);
+
+        return (Guid)await cmd.ExecuteScalarAsync();
+    }
+
+    public async Task InsertTankAsync(Tank tank)
+    {
+        if (_connection.State != System.Data.ConnectionState.Open)
+        {
+            await _connection.OpenAsync();
+        }
+
+        string sql = @"
+            INSERT INTO Tank (Id, Model, SerialNumber, TankType, ManufacturerId)
+            VALUES (@id, @model, @serial, @type, @manId);";
+
+        using var cmd = new NpgsqlCommand(sql, _connection);
+        cmd.Parameters.AddWithValue("id", tank.Id);
+        cmd.Parameters.AddWithValue("model", tank.Model);
+        cmd.Parameters.AddWithValue("serial", tank.SerialNumber);
+        cmd.Parameters.AddWithValue("type", (int)tank.TankType);
+        cmd.Parameters.AddWithValue("manId", tank.ManufacturerId);
+
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    public async Task DataAdder()
+    {
+        var manufacturers = ClassFaker.CreateManufacturers(30);
+        foreach (var manufacturer in manufacturers)
+        {
+            await InsertManufacturerAsync(manufacturer);
+            var tank = ClassFaker.CreateTank(manufacturer);
+            await InsertTankAsync(tank);
+        }
+
+        Console.WriteLine("Data adding completed!");
+    }
+
+    public async Task<Guid> AddManufacturerAsync()
+    {
+        Console.WriteLine("Enter manufacturer name:");
+        string name = Console.ReadLine() ?? throw new ArgumentNullException("Name cannot be null");
+
+        Console.WriteLine("Enter manufacturer address:");
+        string address = Console.ReadLine() ?? throw new ArgumentNullException("Address cannot be null");
+
+        Console.WriteLine("Is this a child company? (Y/N):");
+        string input = Console.ReadLine()?.Trim().ToLower() ?? "N";
+        bool isChild = input.ToLower() == "y";
+
+        var manufacturer = new Manufacturer(name, address, isChild);
+        Guid id = await InsertManufacturerAsync(manufacturer);
+        Console.WriteLine($"Manufacturer added with ID: {id}");
+        return id;
+    }
+
+    public async Task AddTankAsync()
+    {
+        Console.WriteLine("Enter model:");
+        string model = Console.ReadLine() ?? throw new ArgumentNullException("Model cannot be null");
+
+        Console.WriteLine("Enter serial number:");
+        string serial = Console.ReadLine() ?? throw new ArgumentNullException("Serial number cannot be null");
+
+        Console.WriteLine("Enter tank type (0 - Light, 1 - Medium, 2 - Heavy):");
+        if (!int.TryParse(Console.ReadLine(), out int typeValue) || !Enum.IsDefined(typeof(TankType), typeValue))
+        {
+            throw new ArgumentException("Invalid tank type");
+        }
+        TankType type = (TankType)typeValue;
+
+        Console.WriteLine("Enter manufacturer ID:");
+        if (!Guid.TryParse(Console.ReadLine(), out Guid manufacturerId))
+        {
+            throw new ArgumentException("Invalid manufacturer ID format");
+        }
+
+        var tank = new Tank(model, serial, type, manufacturerId);
+        await InsertTankAsync(tank);
+        Console.WriteLine("Tank added successfully.");
+    }
+
+    public async Task<List<Tank>> GetTanksByManufacturerIdAsync(Guid manufacturerId)
+    {
+        var tanks = new List<Tank>();
+
+        if (_connection.State != System.Data.ConnectionState.Open)
+        {
+            await _connection.OpenAsync();
+        }
+
+        string query = @"
+            SELECT t.Id, t.Model, t.SerialNumber, t.TankType, t.ManufacturerId,
+                   m.Name, m.Address, m.IsAChildCompany
+            FROM Tank t
+            JOIN Manufacturer m ON t.ManufacturerId = m.Id
+            WHERE t.ManufacturerId = @manId;";
+
+        using var cmd = new NpgsqlCommand(query, _connection);
+        cmd.Parameters.AddWithValue("manId", manufacturerId);
+
+        using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            var tank = new Tank
+            {
+                Id = reader.GetGuid(0),
+                Model = reader.GetString(1),
+                SerialNumber = reader.GetString(2),
+                TankType = (TankType)reader.GetInt32(3),
+                ManufacturerId = reader.GetGuid(4),
+                Manufacturer = new Manufacturer()
+                {
+                    Id = reader.GetGuid(4),
+                    Name = reader.GetString(5),
+                    Address = reader.GetString(6),
+                    IsAChildCompany = reader.GetBoolean(7)
+                }
+            };
+            tanks.Add(tank);
+        }
+
+        return tanks;
+    }
+}
