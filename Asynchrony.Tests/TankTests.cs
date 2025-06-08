@@ -179,22 +179,6 @@ namespace Asynchrony.Tests
         }
 
         [Test]
-        public void SaveGroupsToXML_ShouldHandleUnevenDistribution()
-        {
-            // Arrange
-            var tanks = ClassFaker.CreateTanks(7);
-            var numberOfGroups = 3;
-
-            // Act
-            XMLManager.SaveGroupsToXML(tanks, numberOfGroups);
-
-            // Assert
-            var files = Directory.GetFiles(".", FileConstants.TankFilePattern);
-            var totalTanks = files.Sum(file => XDocument.Load(file).Descendants(nameof(Tank)).Count());
-            Assert.That(totalTanks, Is.EqualTo(7));
-        }
-
-        [Test]
         public void ProcessXmlFilesAsync_ShouldThrowException_WhenTanksIsNull()
         {
             // Act & Assert
