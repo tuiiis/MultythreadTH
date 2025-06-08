@@ -14,14 +14,22 @@
     <PackageReference Include="NUnit" Version="4.2.2" />
     <PackageReference Include="NUnit.Analyzers" Version="4.3.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageReference Include="Npgsql" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.5" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="NUnit.Framework" />
+    <ProjectReference Include="..\ADO.Net\ADO.Net.csproj" />
   </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\Asynchrony\Asynchrony.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Include="..\ADO.Net\appsettings.json">
+      <Link>appsettings.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 </Project>
