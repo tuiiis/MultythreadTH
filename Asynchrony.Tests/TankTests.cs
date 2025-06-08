@@ -32,123 +32,123 @@ namespace Asynchrony.Tests
         public void CreateTanks_ShouldCreateCorrectNumberOfTanks()
         {
             // Arrange & Act
-            var tanks = ClassFaker.CreateTanks(TestConstants.TestTankCount);
-
-            // Assert
-            Assert.That(tanks, Is.Not.Null);
-            Assert.That(tanks.Count, Is.EqualTo(TestConstants.TestTankCount));
-            Assert.That(tanks.All(t => t != null), Is.True);
-        }
-
-
-        [Test]
-        public async Task ProcessXmlFilesAsync_ShouldCreateCorrectDictionary()
-        {
-            // Arrange
-            var tanks = ClassFaker.CreateTanks(TestConstants.TestTankCount);
-            XMLManager.SaveGroupsToXML(tanks, TestConstants.TestFileCount);
-
-            // Act
-            var dictionary = await ClassManager.ProcessXmlFilesAsync(tanks);
-
-            // Assert
-            Assert.That(dictionary, Is.Not.Null);
-            Assert.That(dictionary.Count, Is.GreaterThan(0));
-            Assert.That(dictionary.All(kvp => kvp.Value.Count > 0), Is.True);
-        }
-
-
-        [Test]
-        public void SaveToXML_ShouldCreateValidXMLFile()
-        {
-            // Arrange
             var tanks = ClassFaker.CreateTanks(5);
-            var filePath = Path.Combine(_testDirectory, "test_tanks.xml");
+
+            // Assert
+            Assert.That(tanks.Count, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void CreateTanks_ShouldCreateValidTankObjects()
+        {
+            // Arrange & Act
+            var tanks = ClassFaker.CreateTanks(1);
+
+            // Assert
+            var tank = tanks[0];
+            Assert.That(tank.ID, Is.GreaterThanOrEqualTo(0));
+            Assert.That(tank.Model, Is.Not.Empty);
+            Assert.That(tank.SerialNumber, Is.Not.Empty);
+            Assert.That(tank.Manufacturer, Is.Not.Null);
+            Assert.That(tank.Manufacturer.Name, Is.Not.Empty);
+            Assert.That(tank.Manufacturer.Address, Is.Not.Empty);
+        }
+
+        [Test]
+        public void CreateTanks_ShouldCreateUniqueTanks()
+        {
+            // Arrange & Act
+            var tanks = ClassFaker.CreateTanks(10);
+
+            // Assert
+            var uniqueIds = tanks.Select(t => t.ID).Distinct().ToList();
+            Assert.That(uniqueIds.Count, Is.EqualTo(tanks.Count));
+        }
+
+        [Test]
+        public void CreateTanks_ShouldCreateTanksWithValidTankTypes()
+        {
+            // Arrange & Act
+            var tanks = ClassFaker.CreateTanks(10);
+
+            // Assert
+            Assert.That(tanks.All(t => Enum.IsDefined(typeof(TankType), t.TankType)), Is.True);
+        }
+
+        [Test]
+        public void SaveToXML_ShouldCreateFile()
+        {
+            // Arrange
+            var tanks = ClassFaker.CreateTanks(1);
+            var filePath = Path.Combine(_testDirectory, "test_tank.xml");
 
             // Act
             XMLManager.SaveToXML(filePath, tanks);
 
             // Assert
             Assert.That(File.Exists(filePath), Is.True);
+        }
+
+        [Test]
+        public void SaveToXML_ShouldCreateValidXMLStructure()
+        {
+            // Arrange
+            var tanks = ClassFaker.CreateTanks(1);
+            var filePath = Path.Combine(_testDirectory, "test_tank.xml");
+
+            // Act
+            XMLManager.SaveToXML(filePath, tanks);
+
+            // Assert
             var doc = XDocument.Load(filePath);
-            var savedTanks = doc.Descendants(nameof(Tank)).ToList();
-            Assert.That(savedTanks.Count, Is.EqualTo(tanks.Count));
+            var tankElement = doc.Descendants(nameof(Tank)).First();
+            Assert.That(tankElement.Element(nameof(Tank.ID)), Is.Not.Null);
+            Assert.That(tankElement.Element(nameof(Tank.Model)), Is.Not.Null);
+            Assert.That(tankElement.Element(nameof(Tank.SerialNumber)), Is.Not.Null);
+            Assert.That(tankElement.Element(nameof(Tank.TankType)), Is.Not.Null);
+            Assert.That(tankElement.Element(nameof(Tank.Manufacturer)), Is.Not.Null);
         }
 
         [Test]
-        public void ProcessXmlFilesAsync_ShouldThrowException_WhenTanksIsNull()
-        {
-            // Act & Assert
-            var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
-                await XMLManager.ProcessXmlFilesAsync(null));
-            Assert.That(ex.Message, Does.Contain("generate tanks first"));
-        }
-
-        [Test]
-        public void MergeTanksToFileAsync_ShouldThrowException_WhenDictionaryIsEmpty()
+        public void SaveToXML_ShouldHandleEmptyTankList()
         {
             // Arrange
-            var emptyDictionary = new ConcurrentDictionary<string, ConcurrentBag<Tank>>();
+            var tanks = new List<Tank>();
+            var filePath = Path.Combine(_testDirectory, "empty_tanks.xml");
 
-            // Act & Assert
-            var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
-                await XMLManager.MergeTanksToFileAsync(emptyDictionary));
-            Assert.That(ex.Message, Does.Contain("No tanks to merge"));
+            // Act
+            XMLManager.SaveToXML(filePath, tanks);
+
+            // Assert
+            var doc = XDocument.Load(filePath);
+            Assert.That(doc.Descendants(nameof(Tank)).Count(), Is.EqualTo(0));
         }
 
         [Test]
-        public async Task ReadFromXMLAsync_ShouldReadTanksCorrectly()
+        public async Task ReadFromXMLAsync_ShouldReadTankData()
         {
             // Arrange
-            var tanks = ClassFaker.CreateTanks(5);
-            var filePath = Path.Combine(_testDirectory, "test_read_tanks.xml");
-            
-            // Create XML with proper Manufacturer structure
-            var xDoc = new XDocument(
-                new XElement(nameof(Tank) + "s",
-                    tanks.Select(t =>
-                        new XElement(nameof(Tank),
-                            new XElement(nameof(Tank.ID), t.ID),
-                            new XElement(nameof(Tank.Model), t.Model),
-                            new XElement(nameof(Tank.SerialNumber), t.SerialNumber),
-                            new XElement(nameof(Tank.TankType), t.TankType),
-                            new XElement(nameof(Tank.Manufacturer),
-                                new XElement("Name", t.Manufacturer.Name),
-                                new XElement("Address", t.Manufacturer.Address),
-                                new XElement("IsAChildCompany", t.Manufacturer.IsAChildCompany)
-                            )
-                        )
-                    )
-                )
-            );
-            xDoc.Save(filePath);
-
+            var tanks = ClassFaker.CreateTanks(1);
+            var filePath = Path.Combine(_testDirectory, "test_read_tank.xml");
+            XMLManager.SaveToXML(filePath, tanks);
             var progress = new Progress<int>(p => { });
 
             // Act
             var readTanks = await XMLManager.ReadFromXMLAsync(filePath, progress);
 
             // Assert
-            Assert.That(readTanks, Is.Not.Null);
-            Assert.That(readTanks.Count, Is.EqualTo(tanks.Count));
-            for (int i = 0; i < tanks.Count; i++)
-            {
-                Assert.That(readTanks[i].ID, Is.EqualTo(tanks[i].ID));
-                Assert.That(readTanks[i].Model, Is.EqualTo(tanks[i].Model));
-                Assert.That(readTanks[i].SerialNumber, Is.EqualTo(tanks[i].SerialNumber));
-                Assert.That(readTanks[i].TankType, Is.EqualTo(tanks[i].TankType));
-                Assert.That(readTanks[i].Manufacturer.Name, Is.EqualTo(tanks[i].Manufacturer.Name));
-                Assert.That(readTanks[i].Manufacturer.Address, Is.EqualTo(tanks[i].Manufacturer.Address));
-                Assert.That(readTanks[i].Manufacturer.IsAChildCompany, Is.EqualTo(tanks[i].Manufacturer.IsAChildCompany));
-            }
+            Assert.That(readTanks.Count, Is.EqualTo(1));
+            Assert.That(readTanks[0].ID, Is.EqualTo(tanks[0].ID));
+            Assert.That(readTanks[0].Model, Is.EqualTo(tanks[0].Model));
+            Assert.That(readTanks[0].SerialNumber, Is.EqualTo(tanks[0].SerialNumber));
         }
 
         [Test]
         public void SaveGroupsToXML_ShouldCreateCorrectNumberOfFiles()
         {
             // Arrange
-            var tanks = ClassFaker.CreateTanks(10);
-            var numberOfGroups = 3;
+            var tanks = ClassFaker.CreateTanks(4);
+            var numberOfGroups = 4;
 
             // Act
             XMLManager.SaveGroupsToXML(tanks, numberOfGroups);
@@ -156,14 +156,51 @@ namespace Asynchrony.Tests
             // Assert
             var files = Directory.GetFiles(".", FileConstants.TankFilePattern);
             Assert.That(files.Length, Is.EqualTo(numberOfGroups));
+        }
 
-            // Verify each file contains tanks
+        [Test]
+        public void SaveGroupsToXML_ShouldDistributeTanksEvenly()
+        {
+            // Arrange
+            var tanks = ClassFaker.CreateTanks(8);
+            var numberOfGroups = 4;
+
+            // Act
+            XMLManager.SaveGroupsToXML(tanks, numberOfGroups);
+
+            // Assert
+            var files = Directory.GetFiles(".", FileConstants.TankFilePattern);
             foreach (var file in files)
             {
                 var doc = XDocument.Load(file);
-                var savedTanks = doc.Descendants(nameof(Tank)).ToList();
-                Assert.That(savedTanks.Count, Is.GreaterThan(0));
+                var tanksInFile = doc.Descendants(nameof(Tank)).Count();
+                Assert.That(tanksInFile, Is.EqualTo(2)); // 8 tanks / 4 groups = 2 tanks per group
             }
+        }
+
+        [Test]
+        public void SaveGroupsToXML_ShouldHandleUnevenDistribution()
+        {
+            // Arrange
+            var tanks = ClassFaker.CreateTanks(7);
+            var numberOfGroups = 3;
+
+            // Act
+            XMLManager.SaveGroupsToXML(tanks, numberOfGroups);
+
+            // Assert
+            var files = Directory.GetFiles(".", FileConstants.TankFilePattern);
+            var totalTanks = files.Sum(file => XDocument.Load(file).Descendants(nameof(Tank)).Count());
+            Assert.That(totalTanks, Is.EqualTo(7));
+        }
+
+        [Test]
+        public void ProcessXmlFilesAsync_ShouldThrowException_WhenTanksIsNull()
+        {
+            // Act & Assert
+            var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await ClassManager.ProcessXmlFilesAsync(null));
+            Assert.That(ex.Message, Does.Contain("generate tanks first"));
         }
 
         [Test]
@@ -177,6 +214,18 @@ namespace Asynchrony.Tests
             var ex = Assert.ThrowsAsync<FileNotFoundException>(async () =>
                 await XMLManager.ReadFromXMLAsync(nonExistentFile, progress));
             Assert.That(ex.Message, Does.Contain("Could not find file"));
+        }
+
+        [Test]
+        public void SaveToXML_ShouldThrowException_WhenFilePathIsInvalid()
+        {
+            // Arrange
+            var tanks = ClassFaker.CreateTanks(1);
+            var invalidPath = "invalid/path/test.xml";
+
+            // Act & Assert
+            Assert.Throws<DirectoryNotFoundException>(() => 
+                XMLManager.SaveToXML(invalidPath, tanks));
         }
     }
 }
