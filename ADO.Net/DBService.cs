@@ -1,19 +1,27 @@
-﻿using Microsoft.Extensions.Configuration;
-using Npgsql;
+﻿using Npgsql;
 using ADO.Net.Models;
-using System.Data.Common;
-
 namespace ADO.Net;
 
+/// <summary>
+/// Service class for handling database operations related to manufacturers and tanks.
+/// </summary>
 public class DBService
 {
     private readonly NpgsqlConnection _connection;
 
+    /// <summary>
+    /// Initializes a new instance of the DBService class.
+    /// </summary>
+    /// <param name="connection">The database connection to use.</param>
     public DBService(NpgsqlConnection connection)
     {
         _connection = connection;
     }
 
+    /// <summary>
+    /// Creates the necessary database tables if they don't exist.
+    /// Creates Manufacturer and Tank tables with appropriate relationships.
+    /// </summary>
     public void CreateTables()
     {
         string createManufacturer = @"
@@ -48,6 +56,11 @@ public class DBService
         }
     }
 
+    /// <summary>
+    /// Inserts a new manufacturer into the database.
+    /// </summary>
+    /// <param name="manufacturer">The manufacturer object to insert.</param>
+    /// <returns>The ID of the inserted manufacturer.</returns>
     public async Task<Guid> InsertManufacturerAsync(Manufacturer manufacturer)
     {
         if (_connection.State != System.Data.ConnectionState.Open)
@@ -69,6 +82,10 @@ public class DBService
         return (Guid)await cmd.ExecuteScalarAsync();
     }
 
+    /// <summary>
+    /// Inserts a new tank into the database.
+    /// </summary>
+    /// <param name="tank">The tank object to insert.</param>
     public async Task InsertTankAsync(Tank tank)
     {
         if (_connection.State != System.Data.ConnectionState.Open)
@@ -90,6 +107,9 @@ public class DBService
         await cmd.ExecuteNonQueryAsync();
     }
 
+    /// <summary>
+    /// Adds sample data to the database by creating 30 manufacturers and their associated tanks.
+    /// </summary>
     public async Task DataAdder()
     {
         var manufacturers = ClassFaker.CreateManufacturers(30);
@@ -103,6 +123,10 @@ public class DBService
         Console.WriteLine("Data adding completed!");
     }
 
+    /// <summary>
+    /// Interactively adds a new manufacturer by prompting for user input.
+    /// </summary>
+    /// <returns>The ID of the newly created manufacturer.</returns>
     public async Task<Guid> AddManufacturerAsync()
     {
         Console.WriteLine("Enter manufacturer name:");
@@ -121,6 +145,9 @@ public class DBService
         return id;
     }
 
+    /// <summary>
+    /// Interactively adds a new tank by prompting for user input.
+    /// </summary>
     public async Task AddTankAsync()
     {
         Console.WriteLine("Enter model:");
@@ -147,6 +174,11 @@ public class DBService
         Console.WriteLine("Tank added successfully.");
     }
 
+    /// <summary>
+    /// Retrieves all tanks associated with a specific manufacturer.
+    /// </summary>
+    /// <param name="manufacturerId">The ID of the manufacturer to find tanks for.</param>
+    /// <returns>A list of tanks associated with the specified manufacturer.</returns>
     public async Task<List<Tank>> GetTanksByManufacturerIdAsync(Guid manufacturerId)
     {
         var tanks = new List<Tank>();
@@ -190,6 +222,10 @@ public class DBService
         return tanks;
     }
 
+    /// <summary>
+    /// Interactively displays all tanks for a specified manufacturer ID.
+    /// Prompts the user for a manufacturer ID and displays the associated tanks.
+    /// </summary>
     public async Task ShowTanksByManufacturerIdInteractiveAsync()
     {
         Console.WriteLine("Enter manufacturer ID (GUID):");
