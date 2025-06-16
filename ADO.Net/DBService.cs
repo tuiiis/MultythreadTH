@@ -9,6 +9,22 @@ public class DBService
 {
     private readonly NpgsqlConnection _connection;
 
+    // Manufacturer field names
+    private const string ManufacturerId = nameof(Manufacturer.Id);
+    private const string ManufacturerName = nameof(Manufacturer.Name);
+    private const string ManufacturerAddress = nameof(Manufacturer.Address);
+    private const string ManufacturerIsAChildCompany = nameof(Manufacturer.IsAChildCompany);
+    private const string ManufacturerTable = nameof(Manufacturer);
+
+    // Tank field names
+    private const string TankId = nameof(Tank.Id);
+    private const string TankModel = nameof(Tank.Model);
+    private const string TankSerialNumber = nameof(Tank.SerialNumber);
+    private const string TankType = nameof(Tank.TankType);
+    private const string TankManufacturerId = nameof(Tank.ManufacturerId);
+    private const string TankTable = nameof(Tank);
+    private const int DataRowsCount = 30;
+
     /// <summary>
     /// Initializes a new instance of the DBService class.
     /// </summary>
@@ -24,21 +40,21 @@ public class DBService
     /// </summary>
     public void CreateTables()
     {
-        string createManufacturer = @"
-        CREATE TABLE IF NOT EXISTS Manufacturer (
-        Id UUID PRIMARY KEY,
-        Name VARCHAR(100) NOT NULL,
-        Address VARCHAR(200),
-        IsAChildCompany BOOLEAN);";
+        string createManufacturer = $@"
+        CREATE TABLE IF NOT EXISTS {ManufacturerTable} (
+        {ManufacturerId} UUID PRIMARY KEY,
+        {ManufacturerName} VARCHAR(100) NOT NULL,
+        {ManufacturerAddress} VARCHAR(200),
+        {ManufacturerIsAChildCompany} BOOLEAN);";
 
-        string createTank = @"
-        CREATE TABLE IF NOT EXISTS Tank (
-        Id UUID PRIMARY KEY,
-        Model VARCHAR(100) NOT NULL,
-        SerialNumber VARCHAR(100),
-        TankType INTEGER,
-        ManufacturerId UUID,
-        FOREIGN KEY (ManufacturerId) REFERENCES Manufacturer(Id));";
+        string createTank = $@"
+        CREATE TABLE IF NOT EXISTS {TankTable} (
+        {TankId} UUID PRIMARY KEY,
+        {TankModel} VARCHAR(100) NOT NULL,
+        {TankSerialNumber} VARCHAR(100),
+        {TankType} INTEGER,
+        {TankManufacturerId} UUID,
+        FOREIGN KEY ({TankManufacturerId}) REFERENCES {ManufacturerTable}({ManufacturerId}));";
 
         if (_connection.State != System.Data.ConnectionState.Open)
         {
@@ -68,16 +84,16 @@ public class DBService
             await _connection.OpenAsync();
         }
 
-        string sql = @"
-            INSERT INTO Manufacturer (Id, Name, Address, IsAChildCompany)
-            VALUES (@id, @name, @address, @isChild)
-            RETURNING Id;";
+        string sql = $@"
+            INSERT INTO {ManufacturerTable} ({ManufacturerId}, {ManufacturerName}, {ManufacturerAddress}, {ManufacturerIsAChildCompany})
+            VALUES (@{ManufacturerId}, @{ManufacturerName}, @{ManufacturerAddress}, @{ManufacturerIsAChildCompany})
+            RETURNING {ManufacturerId};";
 
         using var cmd = new NpgsqlCommand(sql, _connection);
-        cmd.Parameters.AddWithValue("id", manufacturer.Id);
-        cmd.Parameters.AddWithValue("name", manufacturer.Name);
-        cmd.Parameters.AddWithValue("address", manufacturer.Address);
-        cmd.Parameters.AddWithValue("isChild", manufacturer.IsAChildCompany);
+        cmd.Parameters.AddWithValue("@" + ManufacturerId, manufacturer.Id);
+        cmd.Parameters.AddWithValue("@" + ManufacturerName, manufacturer.Name);
+        cmd.Parameters.AddWithValue("@" + ManufacturerAddress, manufacturer.Address);
+        cmd.Parameters.AddWithValue("@" + ManufacturerIsAChildCompany, manufacturer.IsAChildCompany);
 
         return (Guid)await cmd.ExecuteScalarAsync();
     }
@@ -93,16 +109,16 @@ public class DBService
             await _connection.OpenAsync();
         }
 
-        string sql = @"
-            INSERT INTO Tank (Id, Model, SerialNumber, TankType, ManufacturerId)
-            VALUES (@id, @model, @serial, @type, @manId);";
+        string sql = $@"
+            INSERT INTO {TankTable} ({TankId}, {TankModel}, {TankSerialNumber}, {TankType}, {TankManufacturerId})
+            VALUES (@{TankId}, @{TankModel}, @{TankSerialNumber}, @{TankType}, @{TankManufacturerId});";
 
         using var cmd = new NpgsqlCommand(sql, _connection);
-        cmd.Parameters.AddWithValue("id", tank.Id);
-        cmd.Parameters.AddWithValue("model", tank.Model);
-        cmd.Parameters.AddWithValue("serial", tank.SerialNumber);
-        cmd.Parameters.AddWithValue("type", (int)tank.TankType);
-        cmd.Parameters.AddWithValue("manId", tank.ManufacturerId);
+        cmd.Parameters.AddWithValue("@" + TankId, tank.Id);
+        cmd.Parameters.AddWithValue("@" + TankModel, tank.Model);
+        cmd.Parameters.AddWithValue("@" + TankSerialNumber, tank.SerialNumber);
+        cmd.Parameters.AddWithValue("@" + TankType, (int)tank.TankType);
+        cmd.Parameters.AddWithValue("@" + TankManufacturerId, tank.ManufacturerId);
 
         await cmd.ExecuteNonQueryAsync();
     }
@@ -112,7 +128,7 @@ public class DBService
     /// </summary>
     public async Task DataAdder()
     {
-        var manufacturers = ClassFaker.CreateManufacturers(30);
+        var manufacturers = ClassFaker.CreateManufacturers(DataRowsCount);
         foreach (var manufacturer in manufacturers)
         {
             await InsertManufacturerAsync(manufacturer);
@@ -129,10 +145,10 @@ public class DBService
     /// <returns>The ID of the newly created manufacturer.</returns>
     public async Task<Guid> AddManufacturerAsync()
     {
-        Console.WriteLine("Enter manufacturer name:");
+        Console.WriteLine($"Enter {ManufacturerName}:");
         string name = Console.ReadLine() ?? throw new ArgumentNullException("Name cannot be null");
 
-        Console.WriteLine("Enter manufacturer address:");
+        Console.WriteLine($"Enter {ManufacturerAddress}:");
         string address = Console.ReadLine() ?? throw new ArgumentNullException("Address cannot be null");
 
         Console.WriteLine("Is this a child company? (Y/N):");
@@ -141,7 +157,7 @@ public class DBService
 
         var manufacturer = new Manufacturer(name, address, isChild);
         Guid id = await InsertManufacturerAsync(manufacturer);
-        Console.WriteLine($"Manufacturer added with ID: {id}");
+        Console.WriteLine($"Manufacturer added with {ManufacturerId}: {id}");
         return id;
     }
 
@@ -150,20 +166,25 @@ public class DBService
     /// </summary>
     public async Task AddTankAsync()
     {
-        Console.WriteLine("Enter model:");
+        Console.WriteLine($"Enter {TankModel}:");
         string model = Console.ReadLine() ?? throw new ArgumentNullException("Model cannot be null");
 
-        Console.WriteLine("Enter serial number:");
+        Console.WriteLine($"Enter {TankSerialNumber}:");
         string serial = Console.ReadLine() ?? throw new ArgumentNullException("Serial number cannot be null");
 
-        Console.WriteLine("Enter tank type (0 - Light, 1 - Medium, 2 - Heavy):");
+        Console.WriteLine($"Enter Tank Type:");
+        var tankTypes = Enum.GetValues(typeof(TankType));
+        for (int i = 0; i < tankTypes.Length; i++)
+        {
+            Console.WriteLine($"{i} - {tankTypes.GetValue(i)}");
+        }
         if (!int.TryParse(Console.ReadLine(), out int typeValue) || !Enum.IsDefined(typeof(TankType), typeValue))
         {
             throw new ArgumentException("Invalid tank type");
         }
         TankType type = (TankType)typeValue;
 
-        Console.WriteLine("Enter manufacturer ID:");
+        Console.WriteLine($"Enter {TankManufacturerId}:");
         if (!Guid.TryParse(Console.ReadLine(), out Guid manufacturerId))
         {
             throw new ArgumentException("Invalid manufacturer ID format");
@@ -188,15 +209,15 @@ public class DBService
             await _connection.OpenAsync();
         }
 
-        string query = @"
-            SELECT t.Id, t.Model, t.SerialNumber, t.TankType, t.ManufacturerId,
-                   m.Name, m.Address, m.IsAChildCompany
-            FROM Tank t
-            JOIN Manufacturer m ON t.ManufacturerId = m.Id
-            WHERE t.ManufacturerId = @manId;";
+        string query = $@"
+            SELECT t.{TankId}, t.{TankModel}, t.{TankSerialNumber}, t.{TankType}, t.{TankManufacturerId},
+                   m.{ManufacturerName}, m.{ManufacturerAddress}, m.{ManufacturerIsAChildCompany}
+            FROM {TankTable} t
+            JOIN {ManufacturerTable} m ON t.{TankManufacturerId} = m.{ManufacturerId}
+            WHERE t.{TankManufacturerId} = @{TankManufacturerId};";
 
         using var cmd = new NpgsqlCommand(query, _connection);
-        cmd.Parameters.AddWithValue("manId", manufacturerId);
+        cmd.Parameters.AddWithValue("@" + TankManufacturerId, manufacturerId);
 
         using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -228,7 +249,7 @@ public class DBService
     /// </summary>
     public async Task ShowTanksByManufacturerIdInteractiveAsync()
     {
-        Console.WriteLine("Enter manufacturer ID (GUID):");
+        Console.WriteLine($"Enter {ManufacturerId} ({typeof(Guid).Name}):");
         string manufacturerIdStr = Console.ReadLine() ?? throw new ArgumentNullException("Manufacturer ID cannot be null");
 
         if (!Guid.TryParse(manufacturerIdStr, out Guid manufacturerId))
@@ -247,13 +268,13 @@ public class DBService
         Console.WriteLine("\nTanks for manufacturer:");
         foreach (var tank in tanks)
         {
-            Console.WriteLine($"\nTank ID: {tank.Id}");
-            Console.WriteLine($"Model: {tank.Model}");
-            Console.WriteLine($"Serial Number: {tank.SerialNumber}");
-            Console.WriteLine($"Type: {tank.TankType}");
-            Console.WriteLine($"Manufacturer: {tank.Manufacturer!.Name}");
-            Console.WriteLine($"Manufacturer Address: {tank.Manufacturer.Address}");
-            Console.WriteLine($"Is Child Company: {tank.Manufacturer.IsAChildCompany}");
+            Console.WriteLine($"\n{TankId}: {tank.Id}");
+            Console.WriteLine($"{TankModel}: {tank.Model}");
+            Console.WriteLine($"{TankSerialNumber}: {tank.SerialNumber}");
+            Console.WriteLine($"{TankType}: {tank.TankType}");
+            Console.WriteLine($"{ManufacturerName}: {tank.Manufacturer!.Name}");
+            Console.WriteLine($"{ManufacturerAddress}: {tank.Manufacturer.Address}");
+            Console.WriteLine($"{ManufacturerIsAChildCompany}: {tank.Manufacturer.IsAChildCompany}");
             Console.WriteLine("----------------------------------------");
         }
     }
