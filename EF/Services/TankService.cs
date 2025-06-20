@@ -1,21 +1,19 @@
 using Microsoft.EntityFrameworkCore;
-using ADO.Net.Data;
-using ADO.Net.Models;
-using ADO.Net.Repositories;
+using EF.Models;
 
-namespace ADO.Net.Services
+namespace EF.Services
 {
     public class TankService
     {
         private readonly TankDbContext _context;
-        private readonly Repository<Tank> _tankRepository;
-        private readonly Repository<Manufacturer> _manufacturerRepository;
+        private readonly DBService<Tank> _tankRepository;
+        private readonly DBService<Manufacturer> _manufacturerRepository;
 
         public TankService(TankDbContext context)
         {
             _context = context;
-            _tankRepository = new Repository<Tank>(context);
-            _manufacturerRepository = new Repository<Manufacturer>(context);
+            _tankRepository = new DBService<Tank>(context);
+            _manufacturerRepository = new DBService<Manufacturer>(context);
         }
 
         public async Task<bool> AddTankWithNewManufacturerAsync(

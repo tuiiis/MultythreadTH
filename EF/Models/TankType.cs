@@ -1,4 +1,4 @@
-namespace ADO.Net.Models
+namespace EF.Models
 {
     public enum TankType
     {

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using ADO.Net.Models;
+using EF.Models;
 
-namespace ADO.Net.Data
+namespace EF.Services
 {
     public class TankDbContext : DbContext
     {

@@ -1,7 +1,7 @@
 using Bogus;
-using ADO.Net.Models;
+using EF.Models;
 
-namespace EF.Data
+namespace EF.Services
 {
     /// <summary>
     /// A utility class for generating fake data for testing and development purposes.

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ADO.Net.Models
+namespace EF.Models
 {
     public class Tank
     {

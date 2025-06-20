@@ -1,14 +1,13 @@
 using Microsoft.EntityFrameworkCore;
-using ADO.Net.Data;
 
-namespace ADO.Net.Repositories
+namespace EF.Services
 {
-    public class Repository<T> where T : class
+    public class DBService<T> where T : class
     {
         private readonly TankDbContext _context;
         private readonly DbSet<T> _dbSet;
 
-        public Repository(TankDbContext context)
+        public DBService(TankDbContext context)
         {
             _context = context;
             _dbSet = context.Set<T>();
@@ -46,6 +45,26 @@ namespace ADO.Net.Repositories
                 _dbSet.Remove(entity);
                 await _context.SaveChangesAsync();
             }
+        }
+    }
+
+    // Non-generic DBService for static initialization
+    public static class DBService
+    {
+        public static void Initialize(TankDbContext context)
+        {
+            if (context.Manufacturers.Any() || context.Tanks.Any())
+                return;
+
+            // Generate 30 manufacturers using DataFaker
+            var manufacturers = DataFaker.CreateManufacturers(30);
+            context.Manufacturers.AddRange(manufacturers);
+            context.SaveChanges();
+
+            // Generate 30 tanks using DataFaker
+            var tanks = DataFaker.CreateTanks(manufacturers, 30);
+            context.Tanks.AddRange(tanks);
+            context.SaveChanges();
         }
     }
 } 
