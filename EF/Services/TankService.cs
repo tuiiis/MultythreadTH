@@ -6,14 +6,14 @@ namespace EF.Services
     public class TankService
     {
         private readonly TankDbContext _context;
-        private readonly DBService<Tank> _tankRepository;
-        private readonly DBService<Manufacturer> _manufacturerRepository;
+        private readonly Repository<Tank> _tankRepository;
+        private readonly Repository<Manufacturer> _manufacturerRepository;
 
         public TankService(TankDbContext context)
         {
             _context = context;
-            _tankRepository = new DBService<Tank>(context);
-            _manufacturerRepository = new DBService<Manufacturer>(context);
+            _tankRepository = new Repository<Tank>(context);
+            _manufacturerRepository = new Repository<Manufacturer>(context);
         }
 
         public async Task<bool> AddTankWithNewManufacturerAsync(

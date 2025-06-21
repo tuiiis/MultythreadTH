@@ -5,16 +5,16 @@ namespace EF.Services
 {
     public class ConsoleMenu
     {
-        private readonly DBService<Tank> _tankRepository;
-        private readonly DBService<Manufacturer> _manufacturerRepository;
+        private readonly Repository<Tank> _tankRepository;
+        private readonly Repository<Manufacturer> _manufacturerRepository;
         private readonly TankService _tankService;
         private readonly TankDbContext _context;
 
         public ConsoleMenu(TankDbContext context)
         {
             _context = context;
-            _tankRepository = new DBService<Tank>(context);
-            _manufacturerRepository = new DBService<Manufacturer>(context);
+            _tankRepository = new Repository<Tank>(context);
+            _manufacturerRepository = new Repository<Manufacturer>(context);
             _tankService = new TankService(context);
         }
 
