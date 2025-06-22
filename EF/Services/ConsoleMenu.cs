@@ -10,6 +10,10 @@ namespace EF.Services
         private readonly TankService _tankService;
         private readonly TankDbContext _context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConsoleMenu"/> class.
+        /// </summary>
+        /// <param name="context">The database context to use for operations.</param>
         public ConsoleMenu(TankDbContext context)
         {
             _context = context;
@@ -18,6 +22,10 @@ namespace EF.Services
             _tankService = new TankService(context);
         }
 
+        /// <summary>
+        /// Displays the main menu and handles user input for navigation.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public async Task ShowMenuAsync()
         {
             while (true)

@@ -21,7 +21,9 @@ using var context = new TankDbContext(options);
 await context.Database.EnsureCreatedAsync();
 
 // Initialize data
-DBService.Initialize(context);
+int count = 30;
+
+DBService.Initialize(context, count);
 
 // Start console menu
 var menu = new ConsoleMenu(context);

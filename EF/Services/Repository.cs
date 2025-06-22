@@ -88,18 +88,16 @@ namespace EF.Services
         /// Initializes the database with manufacturers and tanks if empty.
         /// </summary>
         /// <param name="context">The database context.</param>
-        public static void Initialize(TankDbContext context)
+        public static void Initialize(TankDbContext context, int count)
         {
             if (context.Manufacturers.Any() || context.Tanks.Any())
                 return;
 
-            // Generate 30 manufacturers using DataFaker
-            var manufacturers = DataFaker.CreateManufacturers(30);
+            var manufacturers = DataFaker.CreateManufacturers(count);
             context.Manufacturers.AddRange(manufacturers);
             context.SaveChanges();
 
-            // Generate 30 tanks using DataFaker
-            var tanks = DataFaker.CreateTanks(manufacturers, 30);
+            var tanks = DataFaker.CreateTanks(manufacturers, count);
             context.Tanks.AddRange(tanks);
             context.SaveChanges();
         }

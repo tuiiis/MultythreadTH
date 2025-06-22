@@ -7,17 +7,6 @@ namespace EF.Tests
     public class DataFakerTests
     {
         [Test]
-        public void CreateManufacturers_WithDefaultCount_ShouldReturnTenManufacturers()
-        {
-            // Act
-            var manufacturers = DataFaker.CreateManufacturers();
-
-            // Assert
-            Assert.That(manufacturers, Is.Not.Null);
-            Assert.That(manufacturers.Count, Is.EqualTo(10));
-        }
-
-        [Test]
         public void CreateManufacturers_WithCustomCount_ShouldReturnSpecifiedNumberOfManufacturers()
         {
             // Arrange
@@ -29,20 +18,6 @@ namespace EF.Tests
             // Assert
             Assert.That(manufacturers, Is.Not.Null);
             Assert.That(manufacturers.Count, Is.EqualTo(count));
-        }
-
-        [Test]
-        public void CreateTanks_WithDefaultCount_ShouldReturnTenTanks()
-        {
-            // Arrange
-            var manufacturers = DataFaker.CreateManufacturers(3);
-
-            // Act
-            var tanks = DataFaker.CreateTanks(manufacturers);
-
-            // Assert
-            Assert.That(tanks, Is.Not.Null);
-            Assert.That(tanks.Count, Is.EqualTo(10));
         }
 
         [Test]

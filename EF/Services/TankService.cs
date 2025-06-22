@@ -16,6 +16,16 @@ namespace EF.Services
             _manufacturerRepository = new Repository<Manufacturer>(context);
         }
 
+        /// <summary>
+        /// Adds a new tank with a new manufacturer in a single transaction.
+        /// </summary>
+        /// <param name="manufacturerName">The name of the manufacturer.</param>
+        /// <param name="manufacturerAddress">The address of the manufacturer.</param>
+        /// <param name="isChildCompany">Indicates if the manufacturer is a child company.</param>
+        /// <param name="tankModel">The model of the tank.</param>
+        /// <param name="serialNumber">The serial number of the tank.</param>
+        /// <param name="tankType">The type of the tank.</param>
+        /// <returns>True if the operation succeeds; otherwise, false.</returns>
         public async Task<bool> AddTankWithNewManufacturerAsync(
             string manufacturerName, string manufacturerAddress, bool isChildCompany,
             string tankModel, string serialNumber, TankType tankType)
@@ -42,6 +52,11 @@ namespace EF.Services
             }
         }
 
+        /// <summary>
+        /// Gets all tanks associated with a specific manufacturer by manufacturer ID.
+        /// </summary>
+        /// <param name="manufacturerId">The unique identifier of the manufacturer.</param>
+        /// <returns>A collection of tanks for the specified manufacturer.</returns>
         public async Task<IEnumerable<Tank>> GetTanksByManufacturerAsync(Guid manufacturerId)
         {
             return await _context.Tanks
@@ -50,6 +65,11 @@ namespace EF.Services
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Gets all tanks associated with manufacturers whose names contain the specified string.
+        /// </summary>
+        /// <param name="manufacturerName">The name or partial name of the manufacturer.</param>
+        /// <returns>A collection of tanks for manufacturers matching the name.</returns>
         public async Task<IEnumerable<Tank>> GetTanksByManufacturerNameAsync(string manufacturerName)
         {
             return await _context.Tanks

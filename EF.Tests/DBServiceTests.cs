@@ -7,6 +7,7 @@ namespace EF.Tests
     [TestFixture]
     public class DBServiceTests
     {
+        private const int ExpectedCount = 30;
         private TankDbContext _context;
 
         [SetUp]
@@ -29,11 +30,11 @@ namespace EF.Tests
         public void Initialize_WithEmptyDatabase_ShouldCreateManufacturersAndTanks()
         {
             // Act
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
 
             // Assert
-            Assert.That(_context.Manufacturers.Count(), Is.EqualTo(30));
-            Assert.That(_context.Tanks.Count(), Is.EqualTo(30));
+            Assert.That(_context.Manufacturers.Count(), Is.EqualTo(ExpectedCount));
+            Assert.That(_context.Tanks.Count(), Is.EqualTo(ExpectedCount));
         }
 
         [Test]
@@ -52,7 +53,7 @@ namespace EF.Tests
             var initialTankCount = _context.Tanks.Count();
 
             // Act
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
 
             // Assert
             Assert.That(_context.Manufacturers.Count(), Is.EqualTo(initialManufacturerCount));
@@ -63,11 +64,11 @@ namespace EF.Tests
         public void Initialize_ShouldCreateValidManufacturers()
         {
             // Act
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
 
             // Assert
             var manufacturers = _context.Manufacturers.ToList();
-            Assert.That(manufacturers.Count, Is.EqualTo(30));
+            Assert.That(manufacturers.Count, Is.EqualTo(ExpectedCount));
 
             foreach (var manufacturer in manufacturers)
             {
@@ -84,11 +85,11 @@ namespace EF.Tests
         public void Initialize_ShouldCreateValidTanks()
         {
             // Act
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
 
             // Assert
             var tanks = _context.Tanks.ToList();
-            Assert.That(tanks.Count, Is.EqualTo(30));
+            Assert.That(tanks.Count, Is.EqualTo(ExpectedCount));
 
             foreach (var tank in tanks)
             {
@@ -108,7 +109,7 @@ namespace EF.Tests
         public void Initialize_ShouldCreateTanksWithValidManufacturerReferences()
         {
             // Act
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
 
             // Assert
             var tanks = _context.Tanks.ToList();
@@ -125,7 +126,7 @@ namespace EF.Tests
         public void Initialize_ShouldCreateUniqueManufacturerIds()
         {
             // Act
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
 
             // Assert
             var manufacturers = _context.Manufacturers.ToList();
@@ -137,7 +138,7 @@ namespace EF.Tests
         public void Initialize_ShouldCreateUniqueTankIds()
         {
             // Act
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
 
             // Assert
             var tanks = _context.Tanks.ToList();
@@ -149,7 +150,7 @@ namespace EF.Tests
         public void Initialize_ShouldCreateUniqueTankSerialNumbers()
         {
             // Act
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
 
             // Assert
             var tanks = _context.Tanks.ToList();
@@ -161,7 +162,7 @@ namespace EF.Tests
         public void Initialize_ShouldCreateTanksWithAllTankTypes()
         {
             // Act
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
 
             // Assert
             var tanks = _context.Tanks.ToList();
@@ -174,7 +175,7 @@ namespace EF.Tests
         public void Initialize_ShouldCreateManufacturersWithBothChildAndParentCompanies()
         {
             // Act
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
 
             // Assert
             var manufacturers = _context.Manufacturers.ToList();
@@ -186,11 +187,11 @@ namespace EF.Tests
         public void Initialize_ShouldHandleMultipleCallsGracefully()
         {
             // Act
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
             var firstCallManufacturerCount = _context.Manufacturers.Count();
             var firstCallTankCount = _context.Tanks.Count();
 
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
             var secondCallManufacturerCount = _context.Manufacturers.Count();
             var secondCallTankCount = _context.Tanks.Count();
 
@@ -203,7 +204,7 @@ namespace EF.Tests
         public void Initialize_ShouldCreateDataInCorrectOrder()
         {
             // Act
-            DBService.Initialize(_context);
+            DBService.Initialize(_context, ExpectedCount);
 
             // Assert
             // Verify that manufacturers are created before tanks

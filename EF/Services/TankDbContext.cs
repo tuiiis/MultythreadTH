@@ -10,6 +10,10 @@ namespace EF.Services
 
         public TankDbContext(DbContextOptions<TankDbContext> options) : base(options) { }
 
+        /// <summary>
+        /// Configures the entity models and their relationships using the Fluent API.
+        /// </summary>
+        /// <param name="modelBuilder">The builder used to construct the model for the context.</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Fluent API configuration
