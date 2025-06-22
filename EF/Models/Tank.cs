@@ -7,36 +7,13 @@ namespace EF.Models
     /// </summary>
     public class Tank
     {
-        /// <summary>
-        /// Gets or sets the unique identifier for the tank.
-        /// </summary>
         public Guid Id { get; set; }
-
-        /// <summary>
-        /// Gets or sets the model name of the tank.
-        /// </summary>
         [Required]
         public string Model { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the serial number of the tank.
-        /// </summary>
         [Required]
         public string SerialNumber { get; set; } = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the type of the tank.
-        /// </summary>
         public TankType TankType { get; set; }
-
-        /// <summary>
-        /// Gets or sets the manufacturer ID for the tank.
-        /// </summary>
         public Guid ManufacturerId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the manufacturer associated with the tank.
-        /// </summary>
         public virtual Manufacturer? Manufacturer { get; set; }
 
         /// <summary>
