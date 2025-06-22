@@ -2,7 +2,7 @@ using EF.Services;
 using EF.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace EF.Tests.Services
+namespace EF.Tests
 {
     [TestFixture]
     public class DBServiceTests

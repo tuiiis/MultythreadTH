@@ -1,8 +1,7 @@
 using EF.Services;
 using EF.Models;
-using NUnit.Framework;
 
-namespace EF.Tests.Services
+namespace EF.Tests
 {
     [TestFixture]
     public class DataFakerTests
